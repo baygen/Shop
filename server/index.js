@@ -87,4 +87,4 @@ app.get('/*', (req, res) => {
 });
 
 
-module.exports.start = () => app.listen(config.port, () => console.log('App listening on port '+ config.port));
+module.exports.start = () => app.listen( process.env.PORT ||config.port, () => console.log('App listening on port '+ config.port));
