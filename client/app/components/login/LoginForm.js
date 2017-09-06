@@ -68,7 +68,7 @@ class LoginForm extends React.Component {
 
           <label className="control-label">e-mail</label>
           <input className="form-control"
-            value={this.state.email}
+            value={email}
             onChange={this.onChange}
               type="text"
               name="email"/>
@@ -78,14 +78,14 @@ class LoginForm extends React.Component {
         <div className={classnames("form-group",{'has-error':errors.password})}>
           <label className="control-label">password</label>
           <input className="form-control"
-            value={this.state.password}
+            value={password}
             onChange={this.onChange}
               type="password"
               name="password"/>
         </div>
         
         <div className="form-group">
-          <button disabled={this.state.isLoading} className="btn btn-primary btn-lg">
+          <button disabled={isLoading} className="btn btn-primary btn-lg">
             Log in
           </button>
         </div>

@@ -23,7 +23,6 @@ class App extends React.Component {
   }
 
   logout(){
-    console.log("logout ")
     axios.post('/logout').then(response=>{
       this.setState({
         isAuth: false,

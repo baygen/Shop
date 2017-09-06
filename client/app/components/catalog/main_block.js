@@ -12,7 +12,7 @@ import './css/catalog.css';
 export default class MainBlock extends React.Component {
 	constructor(props){
 		super(props);
-		var handleToPriceUpdate  = this.handleToPriceUpdate.bind(this);
+		this.handleToPriceUpdate  = this.handleToPriceUpdate.bind(this);
 
 		this.state = {
 			forcePage:0,
@@ -31,7 +31,7 @@ export default class MainBlock extends React.Component {
 
 loadItemsFromServer() {
 
-	axios.post(`/item`,
+	axios.get(`/item`,
 		{params:{
 			page : this.state.offset,
 			search : this.state.search,
@@ -60,9 +60,9 @@ updateSearch(event){
 }
 
 handlePageClick = (data) => {
-	console.log(this.state.forcePage);
+	// console.log(this.state.forcePage);
 	let selected = data.selected;
-	let offset = Math.ceil(selected * 10);
+	let offset = Math.ceil(selected * 12);
 
 	this.setState({ offset : offset, forcePage : selected}, () => {
 		this.loadItemsFromServer();

@@ -3,7 +3,7 @@ var PER_PAGE = 10;
 const _ = require('underscore')
 
 function getPaginatedItems(items, offset) {
-    return items.slice(offset, offset + 10);
+    return items.slice(offset, offset + 12);
 }
 exports.findAll = (req, res) => {
     Product.find({},
@@ -81,7 +81,6 @@ exports.deleteProduct = (id) => {
 exports.findItem = (id, res) => {
     return Product.findById(id, function(err, data) {
         if (err) console.log(err);
-        // console.log(data)
         res.json(data)
     });
 }
@@ -96,8 +95,6 @@ exports.listItem = (req, res) => {
     var maxPrice = req.query.maxPrice ? req.query.maxPrice : 1000000;
     var props = req.query.props ? JSON.parse(req.query.props) : [];
 
-
-    console.log(req.query)
     
     if (props.length > 0) {
         var a = _.map(props, p => {
@@ -121,9 +118,8 @@ exports.listItem = (req, res) => {
             price: { $gte: minPrice, $lte: maxPrice }
         }, { $or: a }]
     }).then(function(doc) {
-        var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 10) };
+        var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };
         //.sort({price:1})
-        console.log(data.total_count)
         res.send(data);
     })
 }

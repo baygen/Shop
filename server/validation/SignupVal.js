@@ -23,7 +23,7 @@ module.exports = function validateInput(data){
     errors.passwordConfirmation = 'Passwords must match';
   }
 
-  return { errors,
+  return { errors : errors,
    isValid:isEmpty(errors)
  }
 }

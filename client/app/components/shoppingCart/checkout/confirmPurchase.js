@@ -40,7 +40,6 @@ export default class ConfirmPurchase extends React.Component {
     }
 
     validateInput(){
-        console.log('valid input')
         var error = {} ;
 
         if(this.state.token === ''){
@@ -58,7 +57,6 @@ export default class ConfirmPurchase extends React.Component {
             this.setState({ errors : error  })
             return false;
         }
-        console.log(!!error)
         return true;
     }
 
@@ -67,10 +65,8 @@ export default class ConfirmPurchase extends React.Component {
         if( !this.validateInput() ) return ;
         const data = {
             amount : this.state.sum,
-            // hard coded must be: this.state.cart
-            sourceAccount : '5291044803410187',
-            token : '1koVlRSV7rIigQW7'
-            // this.state.token
+            sourceAccount : this.state.cart,
+            token : this.state.token
         }
 
         axios.put('/confirm',data).then( res =>{
@@ -87,7 +83,7 @@ export default class ConfirmPurchase extends React.Component {
 
 	render() {
 
-    const { badstatus , sum , address, errors } = this.state;
+    const { badstatus , sum , destination, errors , token, cart} = this.state;
         return (
     <div class="container">  	
         <div className="row">
@@ -101,11 +97,10 @@ export default class ConfirmPurchase extends React.Component {
                     { badstatus && <h4> <p class="text-danger">{badstatus}</p></h4>}
                 <div>
                     <form >
-                        
                         <div className={classnames("form-group",{'has-error': errors.token })}>
                             <label className="control-label">Bank token : </label>
                             <input className="form-control"
-                                value={this.state.token}
+                                value={ token}
                                 onChange={this.onChange}
                                 type="text"
                                 name="token"/>
@@ -115,22 +110,22 @@ export default class ConfirmPurchase extends React.Component {
                         <div className={classnames("form-group",{'has-error' : errors.cart })}>
                             <label className="control-label">Cart number : </label>
                             <input className="form-control"
-                                value={this.state.cart}
+                                value={ cart}
                                 onChange={this.onChange}
                                 type="text"
                                 name="cart"/>
                             { errors.cart &&<span className="text-danger">{errors.cart}</span>}
                         </div>
 
-                        <div className={classnames("form-group")}>
+                        {/* <div className={classnames("form-group")}>
                             <label className="control-label">Destination : </label>
                             <input className="form-control"
-                                value={this.state.destination}
+                                value={destination}
                                 onChange={this.onChange}
                                 type="text"
                                 name="destination"/>
                             { errors.dest && <span className="text-danger">{errors.dest}</span>}
-                        </div>
+                        </div> */}
 
                         <div className={classnames("form-group")}>
                             <label className="control-label">Sum : {sum}</label>

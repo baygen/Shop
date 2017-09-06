@@ -1,10 +1,6 @@
 import React from 'react';
 import { Route, IndexRoute } from 'react-router';
 
-// admin import
-import Admin from './components/admin/Admin'
-import Create from './components/admin/Create'
-import List from './components/admin/List'
 
 import HomePage from './components/catalog/main_block';
 import App from './components/App';
@@ -35,11 +31,6 @@ export default (
           <Route path="shoppinghistory/:id" component={PurchaseDetailes} />
           <Route path="checkout" component={CheckOut}/>
           <Route path="confirm" component={ConfirmPurchase} />
-    <Route path="admin" >
-        <IndexRoute component={Admin}/>
-        <Route path="create" component={Create} />
-    	<Route path="list" component={List} />
-    </Route>
     </Route>
     </div>
 )

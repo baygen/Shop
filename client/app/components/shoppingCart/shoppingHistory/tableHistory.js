@@ -2,14 +2,20 @@ import React from "react";
 import axios from 'axios'
 import {browserHistory} from 'react-router'
 
-// Import React Table
+
 import { BootstrapTable, TableHeaderColumn} from  'react-bootstrap-table';
-// import Popup from 'react-popup'
 import '../css/react-bootstrap-table-all.min.css';
 
 function priceFormatter(cell, row) {
-    console.log(cell)
     return ` ${cell} UAH`;
+}
+
+function dateFormatter( cell, row){
+  var date='  ';
+  date += cell.slice(8,10) + '/'+cell.slice(5,7)+'/'+cell.slice(0,4);
+  date += " "+cell.slice(11,13)+':'+cell.slice(14,16);
+  
+  return date;
 }
 
 
@@ -90,7 +96,7 @@ onSizePerPageList( sizePerPage ) {
   const endOffset = beginOffset + sizePerPage;
   let data = {
     beginOffset : beginOffset,
-    endOffset : beginOffset+sizePerPage,
+    endOffset : endOffset,
     field : this.state.field,
     order : this.state.sortOrder
   }
@@ -110,7 +116,7 @@ pop (row ){
 
   render() {
 
-    const { purchases, loading , popup, totalSize} = this.state;
+    const { purchases, loading , totalSize} = this.state;
     const tableHeight = ( 39 * (this.state.sizePerPage + 1)) + 'px';
 
     const options = {
@@ -150,9 +156,11 @@ pop (row ){
                               containerStyle={ { height : tableHeight } }
                               >
                   <TableHeaderColumn isKey={true} dataField='_id' dataSort={ true }>Order ID</TableHeaderColumn>
-                  <TableHeaderColumn dataField='purchasedDate' dataSort={ true } >Date</TableHeaderColumn>
+                  <TableHeaderColumn dataField='purchasedDate' 
+                                     dataSort={ true } 
+                                     dataFormat={ dateFormatter } >Purchased date</TableHeaderColumn>
                   <TableHeaderColumn dataField='status' dataSort = { true } >Status</TableHeaderColumn>
-                  <TableHeaderColumn dataField='purchasesSum' dataSort={ true } >Order Price</TableHeaderColumn>
+                  <TableHeaderColumn dataField='purchasesSum' dataSort={ true } dataFormat={ priceFormatter }>Order Price</TableHeaderColumn>
               </BootstrapTable>}
         </div>
     );
