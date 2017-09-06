@@ -1,0 +1,47 @@
+.spinner {
+display: inline-block;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  border: 15px solid transparent;
+  border-top-color: #3498db;
+  animation: spin 1.5s linear infinite;
+  z-index: 1001;
+  opacity: 0.8;
+  margin: 150px 0;
+}
+
+.spinner::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border-radius: 50%;
+  border: 15px solid transparent;
+  border-top-color: #e74c3c;
+  animation: spin 3s linear infinite;
+}
+
+.spinner::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border-radius: 50%;
+  border: 15px solid transparent;
+  border-top-color: #f9c922;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
