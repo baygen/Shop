@@ -27463,6 +27463,8 @@
 
 	var _axios2 = _interopRequireDefault(_axios);
 
+	var _reactRouter = __webpack_require__(185);
+
 	var _reactPaginate = __webpack_require__(271);
 
 	var _reactPaginate2 = _interopRequireDefault(_reactPaginate);
@@ -27501,7 +27503,6 @@
 			var _this = _possibleConstructorReturn(this, (MainBlock.__proto__ || Object.getPrototypeOf(MainBlock)).call(this, props));
 
 			_this.handlePageClick = function (data) {
-				// console.log(this.state.forcePage);
 				var selected = data.selected;
 				var offset = Math.ceil(selected * 12);
 
@@ -27610,8 +27611,7 @@
 			key: 'addToCart',
 			value: function addToCart(itemId) {
 				if (!this.props.isAuth) {
-					// alert('You must be logged')
-
+					_reactRouter.browserHistory.push('/login');
 				} else {
 					_axios2.default.put('/shoppingcart/' + itemId);
 				}
@@ -38202,11 +38202,9 @@
 	      var _this2 = this;
 
 	      e.preventDefault();
-	      console.log('onsubmit in profile', this.state);
 	      this.setState({ loading: true });
 	      _axios2.default.put('/profile', this.state).then(function (response) {
 	        if (response.data._id) {
-	          console.log(response.data);
 	          _this2.setState({ saved: 'Changes are saved!', loading: false });
 	          _this2.props.login(_this2.state.name);
 	        } else {
@@ -38667,6 +38665,8 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -38687,17 +38687,25 @@
 				totalSum: 0,
 				message: '',
 				isLoading: false,
-				isUpdating: false
+				isUpdating: false,
+				discountCode: ''
 			};
 
+			_this.goCheckOut = _this.goCheckOut.bind(_this);
 			_this.countAmount = _this.countAmount.bind(_this);
 			_this.deleteItem = _this.deleteItem.bind(_this);
 			_this.updateData = _this.updateData.bind(_this);
 			_this.updateDB = _this.updateDB.bind(_this);
+			_this.onChange = _this.onChange.bind(_this);
 			return _this;
 		}
 
 		_createClass(ShoppingCart, [{
+			key: 'onChange',
+			value: function onChange(e) {
+				this.setState(_defineProperty({}, e.target.name, e.target.value));
+			}
+		}, {
 			key: 'componentWillMount',
 			value: function componentWillMount() {
 				var _this2 = this;
@@ -38760,6 +38768,21 @@
 				});
 			}
 		}, {
+			key: 'goCheckOut',
+			value: function goCheckOut() {
+				if (this.state.discountCode) {
+					_axios2.default.post('/shoppingcart/' + this.state.discountCode).then(function (response) {
+						if (response.data) {
+							var result = 'Sorry , but ' + response.data;
+							alert(result);
+						}
+						_reactRouter.browserHistory.push('/checkout');
+					});
+				} else {
+					_reactRouter.browserHistory.push('/checkout');
+				}
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				var _this5 = this;
@@ -38806,13 +38829,32 @@
 										'div',
 										{ className: 'row text-center' },
 										_react2.default.createElement(
-											'h2',
-											{ style: { marginTop: "0px", marginBottom: " 2px" } },
+											'div',
+											{ className: ' col-md-3 col-md-offset-4' },
 											_react2.default.createElement(
-												'strong',
-												null,
-												'Shopping cart'
+												'h2',
+												{ style: { marginTop: "0px", marginBottom: " 2px" } },
+												_react2.default.createElement(
+													'strong',
+													null,
+													'Shopping cart'
+												)
 											)
+										),
+										_react2.default.createElement(
+											'div',
+											{ className: 'col-md-2 text-right',
+												style: { marginTop: '8px', color: 'red', paddingRight: '0px' } },
+											'Discount code :'
+										),
+										_react2.default.createElement(
+											'div',
+											{ className: ' col-md-3 text-left' },
+											_react2.default.createElement('input', { className: 'form-control',
+												value: this.state.discountCode,
+												onChange: this.onChange,
+												type: 'text',
+												name: 'discountCode' })
 										)
 									),
 									_react2.default.createElement('br', null),
@@ -38942,9 +38984,7 @@
 													null,
 													_react2.default.createElement(
 														'button',
-														{ type: 'button', disabled: isUpdating, className: 'btn btn-success', onClick: function onClick() {
-																return _reactRouter.browserHistory.push('/checkout');
-															} },
+														{ type: 'button', disabled: isUpdating, className: 'btn btn-success', onClick: this.goCheckOut },
 														'Checkout ',
 														_react2.default.createElement('span', { className: 'glyphicon glyphicon-play' })
 													)
@@ -39113,7 +39153,26 @@
 	                        null,
 	                        ' '
 	                    ),
-	                    _react2.default.createElement(
+	                    item.priceWithDisc ? _react2.default.createElement(
+	                        'div',
+	                        null,
+	                        _react2.default.createElement(
+	                            'strong',
+	                            { style: { color: '#fb515d' } },
+	                            item.priceWithDisc,
+	                            ' UAH'
+	                        ),
+	                        _react2.default.createElement(
+	                            'p',
+	                            null,
+	                            _react2.default.createElement(
+	                                'del',
+	                                null,
+	                                item.price,
+	                                ' UAH'
+	                            )
+	                        )
+	                    ) : _react2.default.createElement(
 	                        'strong',
 	                        null,
 	                        item.price,
@@ -39124,7 +39183,12 @@
 	                    'td',
 	                    { className: 'col-sm-1 col-md-2 text-center' },
 	                    _react2.default.createElement('p', null),
-	                    _react2.default.createElement(
+	                    item.costWithDisc ? _react2.default.createElement(
+	                        'strong',
+	                        null,
+	                        item.costWithDisc,
+	                        ' UAH'
+	                    ) : _react2.default.createElement(
 	                        'strong',
 	                        null,
 	                        item.cost,
@@ -39198,6 +39262,7 @@
 
 	        _this.state = {
 	            items: [],
+	            totalDiscount: 0,
 	            purchasesSum: 0,
 	            isLoading: false
 	        };
@@ -39217,7 +39282,8 @@
 	                    _this2.setState({
 	                        items: data.items,
 	                        isLoading: false,
-	                        purchasesSum: data.purchasesSum
+	                        purchasesSum: data.purchasesSum,
+	                        totalDiscount: data.discountSum
 	                    });
 	                }
 	            });
@@ -39440,7 +39506,8 @@
 	            cart: '',
 	            destination: '',
 	            isLoading: false,
-	            errors: {}
+	            errors: {},
+	            delivery: false
 	        };
 
 	        _this.onSubmit = _this.onSubmit.bind(_this);
@@ -39473,21 +39540,23 @@
 	        key: 'validateInput',
 	        value: function validateInput() {
 	            var error = {};
-
-	            if (this.state.token === '') {
-	                error.token = 'token field cant be empty';
-	                this.setState({ errors: error });
-	                return false;
-	            }
-	            if (this.state.cart === '') {
-	                error.cart = 'cart field cant be empty';
-	                this.setState({ errors: error });
-	                return false;
-	            }
-	            if (this.state.destination === '') {
-	                error.dest = 'destination field cant be empty';
-	                this.setState({ errors: error });
-	                return false;
+	            if (!this.state.delivery) {
+	                if (this.state.token === '') {
+	                    error.token = 'token field cant be empty';
+	                    this.setState({ errors: error });
+	                    return false;
+	                }
+	                if (this.state.cart === '') {
+	                    error.cart = 'cart field cant be empty';
+	                    this.setState({ errors: error });
+	                    return false;
+	                }
+	            } else {
+	                if (this.state.destination === '') {
+	                    error.dest = 'destination field cant be empty';
+	                    this.setState({ errors: error });
+	                    return false;
+	                }
 	            }
 	            return true;
 	        }
@@ -39497,6 +39566,10 @@
 	            var _this3 = this;
 
 	            e.preventDefault();
+	            if (!this.props.isAuth) {
+	                _reactRouter.browserHistory.push('/login');
+	                return;
+	            }
 	            if (!this.validateInput()) return;
 	            var data = {
 	                amount: this.state.sum,
@@ -39508,8 +39581,24 @@
 	                if (res.data.error) {
 	                    _this3.setState({ badstatus: res.data.error });
 	                } else if (res) {
-	                    _reactRouter.browserHistory.push('/');
+	                    _this3.setState({ delivery: true });
 	                }
+	            });
+	        }
+	    }, {
+	        key: 'goDeliver',
+	        value: function goDeliver() {
+	            var _this4 = this;
+
+	            if (!this.props.isAuth) {
+	                _reactRouter.browserHistory.push('/login');
+	                return;
+	            }
+	            if (!this.validateInput()) return;
+	            this.setState({ isLoading: true });
+	            _axios2.default.put('/confirm/' + this.state.destination).then(function (res) {
+	                var res = res.data.trackcode ? 'Your trackcode : ' + res.data.trackcode : res.data.error;
+	                _this4.setState({ badstatus: res, isLoading: false });
 	            });
 	        }
 	    }, {
@@ -39522,6 +39611,35 @@
 	                errors = _state.errors,
 	                token = _state.token,
 	                cart = _state.cart;
+
+	            var delivery = _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: (0, _classnames2.default)("form-group") },
+	                    _react2.default.createElement(
+	                        'label',
+	                        { className: 'control-label' },
+	                        'Destination : '
+	                    ),
+	                    _react2.default.createElement('input', { className: 'form-control',
+	                        value: destination,
+	                        onChange: this.onChange,
+	                        type: 'text',
+	                        name: 'destination' }),
+	                    errors.dest && _react2.default.createElement(
+	                        'span',
+	                        { className: 'text-danger' },
+	                        errors.dest
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'button',
+	                    { disabled: this.state.isLoading, className: 'btn btn-primary ', onClick: this.goDeliver },
+	                    'Confirm'
+	                )
+	            );
 
 	            return _react2.default.createElement(
 	                'div',
@@ -39561,78 +39679,82 @@
 	                            _react2.default.createElement(
 	                                'form',
 	                                null,
-	                                _react2.default.createElement(
+	                                this.state.delivery ? delivery : _react2.default.createElement(
 	                                    'div',
-	                                    { className: (0, _classnames2.default)("form-group", { 'has-error': errors.token }) },
+	                                    null,
 	                                    _react2.default.createElement(
-	                                        'label',
-	                                        { className: 'control-label' },
-	                                        'Bank token : '
-	                                    ),
-	                                    _react2.default.createElement('input', { className: 'form-control',
-	                                        value: token,
-	                                        onChange: this.onChange,
-	                                        type: 'text',
-	                                        name: 'token' }),
-	                                    errors.token && _react2.default.createElement(
-	                                        'span',
-	                                        { className: 'text-danger' },
-	                                        errors.token
-	                                    )
-	                                ),
-	                                _react2.default.createElement(
-	                                    'div',
-	                                    { className: (0, _classnames2.default)("form-group", { 'has-error': errors.cart }) },
-	                                    _react2.default.createElement(
-	                                        'label',
-	                                        { className: 'control-label' },
-	                                        'Cart number : '
-	                                    ),
-	                                    _react2.default.createElement('input', { className: 'form-control',
-	                                        value: cart,
-	                                        onChange: this.onChange,
-	                                        type: 'text',
-	                                        name: 'cart' }),
-	                                    errors.cart && _react2.default.createElement(
-	                                        'span',
-	                                        { className: 'text-danger' },
-	                                        errors.cart
-	                                    )
-	                                ),
-	                                _react2.default.createElement(
-	                                    'div',
-	                                    { className: (0, _classnames2.default)("form-group") },
-	                                    _react2.default.createElement(
-	                                        'label',
-	                                        { className: 'control-label' },
-	                                        'Sum : ',
-	                                        sum
-	                                    )
-	                                ),
-	                                _react2.default.createElement(
-	                                    'div',
-	                                    { className: 'form-group' },
-	                                    _react2.default.createElement(
-	                                        'button',
-	                                        { disabled: this.state.isLoading, className: 'btn btn-primary ', onClick: this.onSubmit },
-	                                        'Confirm'
+	                                        'div',
+	                                        { className: (0, _classnames2.default)("form-group", { 'has-error': errors.token }) },
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { className: 'control-label' },
+	                                            'Bank token : '
+	                                        ),
+	                                        _react2.default.createElement('input', { className: 'form-control',
+	                                            value: token,
+	                                            onChange: this.onChange,
+	                                            type: 'text',
+	                                            name: 'token' }),
+	                                        errors.token && _react2.default.createElement(
+	                                            'span',
+	                                            { className: 'text-danger' },
+	                                            errors.token
+	                                        )
 	                                    ),
 	                                    _react2.default.createElement(
-	                                        'span',
-	                                        null,
-	                                        '  '
+	                                        'div',
+	                                        { className: (0, _classnames2.default)("form-group", { 'has-error': errors.cart }) },
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { className: 'control-label' },
+	                                            'Cart number : '
+	                                        ),
+	                                        _react2.default.createElement('input', { className: 'form-control',
+	                                            value: cart,
+	                                            onChange: this.onChange,
+	                                            type: 'text',
+	                                            name: 'cart' }),
+	                                        errors.cart && _react2.default.createElement(
+	                                            'span',
+	                                            { className: 'text-danger' },
+	                                            errors.cart
+	                                        )
 	                                    ),
 	                                    _react2.default.createElement(
-	                                        'span',
-	                                        null,
-	                                        '  '
+	                                        'div',
+	                                        { className: (0, _classnames2.default)("form-group") },
+	                                        _react2.default.createElement(
+	                                            'label',
+	                                            { className: 'control-label' },
+	                                            'Sum : ',
+	                                            sum
+	                                        )
 	                                    ),
 	                                    _react2.default.createElement(
-	                                        'button',
-	                                        { disabled: this.state.isLoading, className: 'btn ', onClick: function onClick() {
-	                                                return _reactRouter.browserHistory.push('shoppingcart');
-	                                            } },
-	                                        'Cancel'
+	                                        'div',
+	                                        { className: 'form-group' },
+	                                        _react2.default.createElement(
+	                                            'button',
+	                                            { disabled: this.state.isLoading, className: 'btn btn-primary ', onClick: this.onSubmit },
+	                                            'Confirm'
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            '  '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'span',
+	                                            null,
+	                                            '  '
+	                                        ),
+	                                        _react2.default.createElement(
+	                                            'button',
+	                                            { disabled: this.state.isLoading, className: 'btn ', onClick: function onClick() {
+	                                                    return _reactRouter.browserHistory.push('shoppingcart');
+	                                                } },
+	                                            'Cancel'
+	                                        )
 	                                    )
 	                                )
 	                            )
@@ -53360,7 +53482,8 @@
 	                                    cart.status == "delivering" ? _react2.default.createElement(
 	                                        'th',
 	                                        { className: 'text-left' },
-	                                        ' 12/09/2017'
+	                                        ' ',
+	                                        cart.arrivedDate ? cart.arrivedDate : '12/09/2017'
 	                                    ) : _react2.default.createElement(
 	                                        'th',
 	                                        null,

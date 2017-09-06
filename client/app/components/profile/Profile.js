@@ -26,11 +26,9 @@ export default class Profile extends React.Component {
 
     onSubmit(e){
         e.preventDefault();
-        console.log('onsubmit in profile', this.state);
         this.setState({ loading : true})        
         axios.put('/profile',this.state).then( response=>{
             if(response.data._id){
-                console.log(response.data)
                 this.setState({ saved:'Changes are saved!', loading : false});
                 this.props.login(this.state.name);
             }else{  

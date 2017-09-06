@@ -15,7 +15,8 @@ export default class ConfirmPurchase extends React.Component {
             cart : '',
             destination : '',
             isLoading : false,
-            errors : {}
+            errors : {},
+            delivery : false
         }
         
         this.onSubmit = this.onSubmit.bind(this);
@@ -39,29 +40,35 @@ export default class ConfirmPurchase extends React.Component {
         this.setState({[e.target.name] : e.target.value , badstatus:'', errors : {} });
     }
 
-    validateInput(){
+    validateInput(  ){
         var error = {} ;
-
-        if(this.state.token === ''){
-            error.token = 'token field cant be empty'
-            this.setState({ errors : error  })
-            return false;
-        }
-        if(this.state.cart === ''){
-            error.cart = 'cart field cant be empty'
-            this.setState({ errors : error  })
-            return false;
-        }
-        if(this.state.destination === ''){
-            error.dest = 'destination field cant be empty'
-            this.setState({ errors : error  })
-            return false;
+        if( !this.state.delivery ){
+            if(this.state.token === ''){
+                error.token = 'token field cant be empty'
+                this.setState({ errors : error  })
+                return false;
+            }
+            if(this.state.cart === ''){
+                error.cart = 'cart field cant be empty'
+                this.setState({ errors : error  })
+                return false;
+            }
+        }else{
+            if(this.state.destination === ''){
+                error.dest = 'destination field cant be empty'
+                this.setState({ errors : error  })
+                return false;
+            }
         }
         return true;
     }
 
     onSubmit(e){
         e.preventDefault();
+        if( !this.props.isAuth ) {
+            browserHistory.push('/login');
+            return;
+        }
         if( !this.validateInput() ) return ;
         const data = {
             amount : this.state.sum,
@@ -73,17 +80,46 @@ export default class ConfirmPurchase extends React.Component {
                 if(res.data.error) {
                     this.setState({ badstatus : res.data.error } )
                 }else if( res ){
-                    browserHistory.push('/')
+                    this.setState({ delivery : true})
                 }
             }
         )
     }
 
+    goDeliver(){
+        if( !this.props.isAuth ) {
+            browserHistory.push('/login');
+            return;
+        }
+        if(!this.validateInput() ) return ;
+        this.setState({ isLoading : true})
+        axios.put(`/confirm/${this.state.destination}`).then( res=>{
+            var res = res.data.trackcode ? 'Your trackcode : '+res.data.trackcode : res.data.error;
+            this.setState({ badstatus : res, isLoading : false })
+        })
+    }
 
 
 	render() {
 
     const { badstatus , sum , destination, errors , token, cart} = this.state;
+    const delivery = (  <div>
+                        <div className={classnames("form-group")}>
+                        <label className="control-label">Destination : </label>
+                        <input className="form-control"
+                            value={destination}
+                            onChange={this.onChange}
+                            type="text"
+                            name="destination"/>
+                        { errors.dest && <span className="text-danger">{errors.dest}</span>}
+                      </div>
+                      <button disabled={this.state.isLoading} className="btn btn-primary " onClick={this.goDeliver}>
+                        Confirm
+                      </button>
+                      </div>
+                    );
+
+
         return (
     <div class="container">  	
         <div className="row">
@@ -97,6 +133,8 @@ export default class ConfirmPurchase extends React.Component {
                     { badstatus && <h4> <p class="text-danger">{badstatus}</p></h4>}
                 <div>
                     <form >
+                        { this.state.delivery ? delivery :
+                        <div>
                         <div className={classnames("form-group",{'has-error': errors.token })}>
                             <label className="control-label">Bank token : </label>
                             <input className="form-control"
@@ -117,16 +155,6 @@ export default class ConfirmPurchase extends React.Component {
                             { errors.cart &&<span className="text-danger">{errors.cart}</span>}
                         </div>
 
-                        {/* <div className={classnames("form-group")}>
-                            <label className="control-label">Destination : </label>
-                            <input className="form-control"
-                                value={destination}
-                                onChange={this.onChange}
-                                type="text"
-                                name="destination"/>
-                            { errors.dest && <span className="text-danger">{errors.dest}</span>}
-                        </div> */}
-
                         <div className={classnames("form-group")}>
                             <label className="control-label">Sum : {sum}</label>
                         </div>
@@ -140,6 +168,7 @@ export default class ConfirmPurchase extends React.Component {
                                 Cancel
                             </button>
                         </div>
+                         </div>   }
                     </form>
                 </div>
             </div>

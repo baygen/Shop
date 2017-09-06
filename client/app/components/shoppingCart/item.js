@@ -61,12 +61,15 @@ export default class ItemView extends React.Component {
             
             <td className="col-sm-1 col-md-2 text-center">
                 <p> </p>
-                <strong>{item.price} UAH</strong>
+                {item.priceWithDisc ? <div><strong style={{color:'#fb515d'}} >{item.priceWithDisc} UAH</strong>
+                                      <p><del>{item.price} UAH</del></p></div>
+                                    : <strong>{item.price} UAH</strong>
+                }
             </td>
 
             <td className="col-sm-1 col-md-2 text-center">
                 <p></p>
-                <strong>{item.cost} UAH</strong>
+                {item.costWithDisc ? <strong>{item.costWithDisc} UAH</strong> :<strong>{item.cost} UAH</strong>}
             </td>
 
             { this.props.checkOut ? <td></td>:

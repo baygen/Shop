@@ -9,7 +9,8 @@ class CheckOut extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-			items : [],
+            items : [],
+            totalDiscount : 0,
 			purchasesSum : 0,
 			isLoading : false
 		}
@@ -25,7 +26,8 @@ class CheckOut extends React.Component {
                 this.setState({
                     items : data.items, 
                     isLoading : false,
-                    purchasesSum : data.purchasesSum
+                    purchasesSum : data.purchasesSum,
+                    totalDiscount : data.discountSum
                     });
             }
         })     
@@ -72,7 +74,8 @@ class CheckOut extends React.Component {
                         <td>   </td>
                         <td>   </td>
                         <td className="text-center "><h3><strong>Total cost </strong></h3></td>
-                        <td className="text-right"><h3><strong>{this.state.purchasesSum} UAH</strong></h3></td>
+                        <td className="text-right">
+                            <h3><strong>{this.state.purchasesSum} UAH</strong></h3></td>
                         <td>   </td>
 
                     </tr>

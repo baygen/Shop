@@ -10,6 +10,10 @@ module.exports = (app) => {
         dbPurchase.getShoppingCart(req,res, next)
     );
 
+    app.post('/shoppingcart/:discontcode', (req,res)=>
+        dbPurchase.setDiscountToCart( req, res)
+    )
+
     app.put('/shoppingcart/:id', (req,res)=>
         dbPurchase.addItemToShoppingCart(req,res)
     );

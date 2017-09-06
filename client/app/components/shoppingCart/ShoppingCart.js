@@ -15,13 +15,20 @@ export default class ShoppingCart extends React.Component {
 			totalSum : 0,
 			message :'',
 			isLoading : false,
-			isUpdating : false
+			isUpdating : false,
+			discountCode :''
 		}
-			
+		
+		this.goCheckOut = this.goCheckOut.bind(this);
 		this.countAmount = this.countAmount.bind(this);
 		this.deleteItem = this.deleteItem.bind(this);
 		this.updateData = this.updateData.bind(this);
-		this.updateDB = this.updateDB.bind(this)
+		this.updateDB = this.updateDB.bind(this);
+		this.onChange = this.onChange.bind(this)
+	}
+
+	onChange(e){
+		this.setState({[e.target.name]:e.target.value})
 	}
 	
 	componentWillMount(){
@@ -77,6 +84,22 @@ export default class ShoppingCart extends React.Component {
 		})
 	}
 	
+	goCheckOut(){
+		if(this.state.discountCode){
+			axios.post(`/shoppingcart/${this.state.discountCode}`)
+				.then( response => {
+					if(response.data) {
+						let result = 'Sorry , but '+response.data;
+						alert(result)
+					}
+					browserHistory.push('/checkout')
+				})
+		}else{
+			browserHistory.push('/checkout');
+		}
+
+	}
+
 	render() {
 		const{items, message, isLoading, isUpdating}=this.state;
 
@@ -99,11 +122,25 @@ export default class ShoppingCart extends React.Component {
 		    <div className="row">
         		<div className="col-sm-12 col-md-10 col-md-offset-1">
 					<div className="row text-center" >
+						<div className=" col-md-3 col-md-offset-4">
 						<h2 style={{ marginTop : "0px", marginBottom:" 2px"}} >
 							<strong>
 								Shopping cart
 							</strong>
 						</h2>
+						</div>
+						<div className = "col-md-2 text-right" 
+							style={{marginTop:'8px',color:'red',paddingRight:'0px'}} >
+							Discount code :
+						</div>
+						<div className=" col-md-3 text-left">
+								
+							<input className="form-control"
+								value={this.state.discountCode}
+								onChange={this.onChange}
+								type="text"
+								name="discountCode"/>
+						</div>
 					</div>
 			<br/>
             <table className="table table-hover">
@@ -143,7 +180,7 @@ export default class ShoppingCart extends React.Component {
                             <span className="glyphicon glyphicon-shopping-cart" ></span> Continue Shopping
                         </button></th>
                         <th>
-                        <button type="button" disabled={isUpdating} className="btn btn-success" onClick={()=>browserHistory.push(`/checkout`)}>
+                        <button type="button" disabled={isUpdating} className="btn btn-success" onClick={this.goCheckOut}>
                             Checkout <span className="glyphicon glyphicon-play"></span>
                         </button></th>
                     </tr>

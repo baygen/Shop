@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import { browserHistory } from 'react-router';
 import ReactPaginate from 'react-paginate';
 
 //custom components
@@ -60,7 +61,6 @@ updateSearch(event){
 }
 
 handlePageClick = (data) => {
-	// console.log(this.state.forcePage);
 	let selected = data.selected;
 	let offset = Math.ceil(selected * 12);
 
@@ -113,8 +113,7 @@ handlePropsRemove(name,value){
 
 addToCart(itemId){
 	if( !this.props.isAuth ) {
-		// alert('You must be logged')
-
+        browserHistory.push('/login');
 	}else{
 		axios.put(`/shoppingcart/${itemId}`);
 	}

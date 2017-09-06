@@ -1,10 +1,10 @@
 const Purchase = require('../dbSchemas/purchase');
 const Product = require('../dbSchemas/product');
+const Discount = require('../dbSchemas/discount');
 const _ = require('underscore')
 
 
 exports.addItemToShoppingCart = (req, res) => {
-    console.log('additem to shopcart')
 
     Purchase.findOne({
         userId: req.user._id.toString(),
@@ -70,25 +70,67 @@ exports.getShoppingCart = (req, res) => {
         })
 }
 
+exports.setDiscountToCart = ( req, res)=>{
+    var expired = false;
+    Discount.findOne({ disCode : req.params.discontcode }
+    ).then( discount =>{
+        if( !discount ) throw new Error ("discount didn't exist !");
+        if(discount.dateExpired < Date.now()){
+            expired = true;
+        }
+        return Purchase.findOne({ userId : req.user._id.toString(), status :'shoppingCart' },'_id discount')
+    }).then( purchase => {
+            purchase.discount = expired ? '' : req.params.discontcode;
+            return purchase.save()
+    }).then(  doc =>{
+            if(expired) throw new Error('discount is outdated !');
+            res.send();
+    }).catch(err => {
+            res.json(err.message)
+    });
+    
+}
+
 exports.checkout = (req, res) => {
     var cart;
+    var productsInCart;
+    var discData;
+
     Purchase.findOne({
-        // _id : req.params.cartId
         userId: req.user._id.toString(),
         status: 'shoppingCart'
-    }, 'items').lean()
+    }, 'items discount').lean()
     .then(data => {
         cart = data;
         let ids = _.map(data.items, item => item._id);
         return Product.find({ _id: { $in: ids } }, '_id title img price').lean();
     }).then(products => {
-
+        productsInCart = products;
+        if( cart.discount ){
+            return Discount.findOne({ disCode : cart.discount });
+        }else{
+            return null;
+        }
+    }).then( discount =>{
         let purchasesSum = 0;
+        // discountSum sum for discount values
+        let discountSum = 0;
         let itemsToBuy = _.map(cart.items, item => {
-            let product = _.find( products, product => item._id == product._id);
+            let product = _.find( productsInCart, product => item._id == product._id);
                 var cost = product.price * item.quantity;
                 purchasesSum += cost;
                 item.cost = cost;
+
+            if( discount != null ){
+                let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
+                if( typeof discData !== 'undefined'){
+                    let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
+                    let costWithDisc = item.quantity * priceWithDisc;
+                    discountSum += cost - costWithDisc;
+                    item.priceWithDisc = priceWithDisc;
+                    item.costWithDisc = costWithDisc;
+                }
+            }
 
             return _.extend({
                 img: product.img,
@@ -96,14 +138,15 @@ exports.checkout = (req, res) => {
                 title: product.title,
                 price: product.price
                 }, item)
-        }) 
-        const data ={ items : itemsToBuy, sum : purchasesSum};
-        return data;
+        });
+        let sum = purchasesSum-discountSum;
+        return { items : itemsToBuy, sum : sum, discountSum : discountSum};
     }).then ( updData =>
         Purchase.findByIdAndUpdate( cart._id , 
             { $set: { 
                 items: updData.items , 
-                purchasesSum: +updData.sum } 
+                purchasesSum : +updData.sum,
+                discountSum : +updData.discountSum } 
             }, {new : true} )
     ).then( result => {
         if (!result) throw new Error("cannot update cart to buy")
@@ -126,7 +169,6 @@ exports.confirmPurchase = (req, res) => {
         })
     ).then(cart => {
         if (!cart) throw new Error('Cannot confirm purchase')
-        
         return Purchase.findById(cart._id)
     }).then( cart => { 
         return cart.userId;
@@ -168,7 +210,6 @@ exports.findUserHistory = (req, res) => {
 }
 
 exports.findPurchaseById = ( id , res)=>{
-
     Purchase.findById(id
     ).then( cart =>{
         if(!cart) throw new Error(" Cart not found") 

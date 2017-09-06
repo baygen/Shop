@@ -69,7 +69,7 @@ export default class PurchaseDetailes extends React.Component {
                             <th className="text-right"><strong>Status : </strong></th>
                             <th>{cart.status} </th>
                             { cart.status == "delivering" ? <th className="text-right"> Finished at:</th> : <th> </th>}
-                            { cart.status == "delivering" ? <th className="text-left"> 12/09/2017</th> : <th> </th>}
+                            { cart.status == "delivering" ? <th className="text-left"> {cart.arrivedDate ? cart.arrivedDate : '12/09/2017'}</th> : <th> </th>}
                         </tr>
                         <tr>
                             <th></th><th></th><th></th><th></th>
