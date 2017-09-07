@@ -103,7 +103,7 @@ exports.checkout = (req, res) => {
     .then(data => {
         cart = data;
         let ids = _.map(data.items, item => item._id);
-        return Product.find({ _id: { $in: ids } }, '_id title img price').lean();
+        return Product.find({ _id: { $in: ids } }, '_id title img price accessible').lean();
     }).then(products => {
         productsInCart = products;
         if( cart.discount ){
@@ -117,22 +117,26 @@ exports.checkout = (req, res) => {
         let discountSum = 0;
         let itemsToBuy = _.map(cart.items, item => {
             let product = _.find( productsInCart, product => item._id == product._id);
+            if( product.accessible ){
                 var cost = product.price * item.quantity;
                 purchasesSum += cost;
                 item.cost = cost;
 
-            if( discount != null ){
-                let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
-                if( typeof discData !== 'undefined'){
-                    let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
-                    let costWithDisc = item.quantity * priceWithDisc;
-                    discountSum += cost - costWithDisc;
-                    item.priceWithDisc = priceWithDisc;
-                    item.costWithDisc = costWithDisc;
-                }
+                    if( discount != null ){
+                        let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
+                        if( typeof discData !== 'undefined'){
+                            let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
+                            let costWithDisc = item.quantity * priceWithDisc;
+                            discountSum += cost - costWithDisc;
+                            item.priceWithDisc = priceWithDisc;
+                            item.costWithDisc = costWithDisc;
+                        }
+                    }
+            }else{
+                item.cost = 0;
             }
-
             return _.extend({
+                accessible : product.accessible,
                 img: product.img,
                 desc: product.desc,
                 title: product.title,

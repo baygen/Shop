@@ -62,8 +62,9 @@ class CheckOut extends React.Component {
                 </thead>
                 <tbody>
 					
-					{items&&items.map((item,index) =>
-						<Item key={index}
+					{items && items.map((item,index) =>
+						item.accessible &&
+                        <Item key={index}
 						checkOut = {true}
 						id={index}
 						item={item} 

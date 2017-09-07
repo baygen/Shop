@@ -71,10 +71,17 @@ export default class ShoppingCart extends React.Component {
 		var total=0;
 		const {items} = this.state;
 		items.map((item, index)=>{
-			item.cost = item.price*item.quantity;
-			total += item.cost;
+			if(item.accessible ){
+				item.cost = item.price * item.quantity;
+				total += item.cost;
+			}else{
+				item.cost = 0;
+				if(!!item.costWithDisc) item.costWithDisc = 0;
+			}
 		});
-		this.setState({items : items, totalSum : total }, ()=>this.updateDB() );
+		console.log('after counted')
+		console.log(items)
+		this.setState({ items : items, totalSum : total }, ()=>this.updateDB() );
 	}
 
 	updateDB(){
@@ -155,7 +162,7 @@ export default class ShoppingCart extends React.Component {
                 </thead>
                 <tbody>
 					
-					{items&&items.map((item,index) =>
+					{items && items.map((item,index) =>
 						<Item key={index}
 						id={index}
 						item={item} 

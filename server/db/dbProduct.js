@@ -25,57 +25,57 @@ exports.listProduct = (req, res) => {
     });
 }
 
-exports.createProduct = (data) => {
-    const product = new Product({
-        title: data.title,
-        desc: data.desc,
-        price: data.price,
-        tags: data.tags,
-        img: data.img,
-        properties: data.properties,
-        accessible: data.accessible
-    });
-    return product.save((function(err) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('Added new! \n' + product);
-        }
-    }));
-}
+// exports.createProduct = (data) => {
+//     const product = new Product({
+//         title: data.title,
+//         desc: data.desc,
+//         price: data.price,
+//         tags: data.tags,
+//         img: data.img,
+//         properties: data.properties,
+//         accessible: data.accessible
+//     });
+//     return product.save((function(err) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             console.log('Added new! \n' + product);
+//         }
+//     }));
+// }
 
-exports.editProduct = (id, data) => {
-    return Product.findById(id, function(err, edited) {
-        if (err) {
-            console.log(err)
-        }
-        edited.title = data.title;
-        edited.desc = data.desc;
-        edited.price = data.price;
-        edited.tags = data.tags;
-        edited.img = data.img;
-        edited.accessible = data.accessible;
-        edited.properties = data.properties;
+// exports.editProduct = (id, data) => {
+//     return Product.findById(id, function(err, edited) {
+//         if (err) {
+//             console.log(err)
+//         }
+//         edited.title = data.title;
+//         edited.desc = data.desc;
+//         edited.price = data.price;
+//         edited.tags = data.tags;
+//         edited.img = data.img;
+//         edited.accessible = data.accessible;
+//         edited.properties = data.properties;
 
-        edited.save(function(err) {
-            if (err) {
-                console.log(err);
-            }
-        })
-    });
+//         edited.save(function(err) {
+//             if (err) {
+//                 console.log(err);
+//             }
+//         })
+//     });
 
-}
+// }
 
 
-exports.deleteProduct = (id) => {
-    return Product.findById(id).remove((function(err) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('deleted! id:' + id);
-        }
-    }));
-}
+// exports.deleteProduct = (id) => {
+//     return Product.findById(id).remove((function(err) {
+//         if (err) {
+//             console.log(err);
+//         } else {
+//             console.log('deleted! id:' + id);
+//         }
+//     }));
+// }
 
 
 exports.findItem = (id, res) => {
@@ -111,11 +111,11 @@ exports.listItem = (req, res) => {
     var flag = 'gi'
     filter = "^(.*?)(" + filter + ")(.*)$";
     var regex = new RegExp(filter, flag);
-
+//  TODO accesible
     /*Find in BD*/
     Product.find({
         $and: [{ $or: [{ title: { $regex: regex } }, { desc: { $regex: regex } }] }, {
-            price: { $gte: minPrice, $lte: maxPrice }
+            price: { $gte: minPrice, $lte: maxPrice },
         }, { $or: a }]
     }).then(function(doc) {
         var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };

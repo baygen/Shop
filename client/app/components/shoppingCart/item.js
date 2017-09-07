@@ -48,20 +48,21 @@ export default class ItemView extends React.Component {
 
                 <td className="col-sm-1 col-md-1 text-center" >
                 <p> </p>
-                {this.props.checkOut ? <div className="media-body"><h4 className="media-heading">{item.quantity}</h4></div> :
+                {item.accessible ?   
+                    this.props.checkOut ? <div className="media-body"><h4 className="media-heading">{item.quantity}</h4></div> :
                     <input type="Number" 
                         name="amount"
                         className="form-control"  
                         onChange={this.onChange}    
                         value={this.props.item.quantity}
-                    />
+                    /> : <label>not availiable</label>
                 }
             
                 </td>
             
             <td className="col-sm-1 col-md-2 text-center">
                 <p> </p>
-                {item.priceWithDisc ? <div><strong style={{color:'#fb515d'}} >{item.priceWithDisc} UAH</strong>
+                { item.priceWithDisc ? <div><strong style={{color:'#fb515d'}} >{item.priceWithDisc} UAH</strong>
                                       <p><del>{item.price} UAH</del></p></div>
                                     : <strong>{item.price} UAH</strong>
                 }
