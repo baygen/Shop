@@ -72,6 +72,7 @@ export default class ShoppingCart extends React.Component {
 		const {items} = this.state;
 		items.map((item, index)=>{
 			if(item.accessible ){
+				
 				item.cost = item.price * item.quantity;
 				total += item.cost;
 			}else{
@@ -174,9 +175,17 @@ export default class ShoppingCart extends React.Component {
                     <tr>
                         <th>   </th>
                         <th>   </th>
-                        <th>   </th>
-                        <th><h3>Total</h3></th>
-                        <th className="text-right"><h3><strong>{this.state.totalSum} UAH</strong></h3></th>
+                        
+                        <th className="text-right"><h3></h3></th>
+                        <th className="col-md-3 text-left">
+							<h3> <strong>Total :</strong> 			
+								<span className="glyphicon glyphicon-usd" style={{marginLeft:'14px'}}/>
+								<strong className="text-center" style={{fontSize:'26px',marginLeft:'4px'}}>
+									{this.state.totalSum/100}
+								</strong>
+							</h3>
+						</th>
+						<th>   </th>
                     </tr>
                     <tr>
                         <th>   </th>
@@ -184,7 +193,7 @@ export default class ShoppingCart extends React.Component {
                         <th>   </th>
                         <th>
                         <button type="button" className="btn btn-default" onClick={()=>browserHistory.push('/')}>
-                            <span className="glyphicon glyphicon-shopping-cart" ></span> Continue Shopping
+                            <span className="glyphicon glyphicon-shopping-cart" /> Continue Shopping
                         </button></th>
                         <th>
                         <button type="button" disabled={isUpdating} className="btn btn-success" onClick={this.goCheckOut}>

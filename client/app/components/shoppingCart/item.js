@@ -62,19 +62,35 @@ export default class ItemView extends React.Component {
             
             <td className="col-sm-1 col-md-2 text-center">
                 <p> </p>
-                { item.priceWithDisc ? <div><strong style={{color:'#fb515d'}} >{item.priceWithDisc} UAH</strong>
-                                      <p><del>{item.price} UAH</del></p></div>
-                                    : <strong>{item.price} UAH</strong>
+                { item.priceWithDisc ? <div><span className="glyphicon glyphicon-usd" />
+                                        <strong style={{color:'#fb515d',fontSize:'19px'}} >
+                                           {item.priceWithDisc/100}
+                                        </strong>
+                                      <p><span className="glyphicon glyphicon-usd" /> 
+                                          <del>
+                                          {item.price/100}
+                                          </del>
+                                      </p>
+                                      </div>
+                                    : <div><span className="glyphicon glyphicon-usd" /> <strong style={{fontSize:'19px'}}> {item.price/100}</strong> </div>
                 }
             </td>
 
             <td className="col-sm-1 col-md-2 text-center">
                 <p></p>
-                {item.costWithDisc ? <strong>{item.costWithDisc} UAH</strong> :<strong>{item.cost} UAH</strong>}
+                { item.accessible ? item.costWithDisc ? <div>
+                                                            <span className="glyphicon glyphicon-usd" />
+                                                            <strong style={{fontSize:'19px'}} > {item.costWithDisc/100}</strong>
+                                                        </div> 
+                                                    :<div>
+                                                        <span className="glyphicon glyphicon-usd" /><strong style={{fontSize:'19px'}}> {item.cost/100}</strong>
+                                                    </div>
+                                 : <label>-</label>                                    
+                }
             </td>
 
             { this.props.checkOut ? <td></td>:
-                <td className="col-sm-1 col-md-1">
+                <td className="col-sm-1 col-md-1 text-center">
                     <p> </p>                    
                     <button type="button" className="btn btn-danger"  onClick={this.props.deleteItem}>
                         <span className="glyphicon glyphicon-remove" ></span>

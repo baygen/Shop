@@ -8,7 +8,8 @@ export default class ConfirmPurchase extends React.Component {
 	constructor(props){
 		super(props);
 
-		this.state = {            
+		this.state = {
+            purchaseId :"59b141c9053b128c99f7c020",
             badstatus : '',
             sum : '0',
             token : '',
@@ -22,6 +23,7 @@ export default class ConfirmPurchase extends React.Component {
         this.onSubmit = this.onSubmit.bind(this);
         this.onChange = this.onChange.bind(this);
         this.validateInput = this.validateInput.bind(this);
+        this.goDeliver = this.goDeliver.bind(this)
     }
 
     componentWillMount(){
@@ -30,7 +32,7 @@ export default class ConfirmPurchase extends React.Component {
         axios.post('/confirm').then(response => {
             if(response.data.address) this.setState({ destination : response.data.address })            
             this.setState( { 
-                sum : response.data.purchasesSum,
+                sum : response.data.purchasesSum/100,
                 isLoading : false }
             )
         });
@@ -80,7 +82,7 @@ export default class ConfirmPurchase extends React.Component {
                 if(res.data.error) {
                     this.setState({ badstatus : res.data.error } )
                 }else if( res ){
-                    this.setState({ delivery : true})
+                    this.setState({ delivery : true, purchaseId : res.data.cartId})
                 }
             }
         )
@@ -93,8 +95,12 @@ export default class ConfirmPurchase extends React.Component {
         }
         if(!this.validateInput() ) return ;
         this.setState({ isLoading : true})
-        axios.put(`/confirm/${this.state.destination}`).then( res=>{
-            var res = res.data.trackcode ? 'Your trackcode : '+res.data.trackcode : res.data.error;
+        console.log('goDEliver')
+        axios.put(`/confirm/${this.state.destination}`,{id:this.state.purchaseId}).then( res=>{
+            console.log(res.data)
+            var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
+                                                +`.           Arrived time : ${res.data.arrivedtime}`
+                                         : res.data.error;
             this.setState({ badstatus : res, isLoading : false })
         })
     }
@@ -132,8 +138,8 @@ export default class ConfirmPurchase extends React.Component {
             <div className="col-md-4 col-md-offset-4">
                     { badstatus && <h4> <p class="text-danger">{badstatus}</p></h4>}
                 <div>
-                    <form >
-                        { this.state.delivery ? delivery :
+                { this.state.delivery ? delivery :<form >
+                        
                         <div>
                         <div className={classnames("form-group",{'has-error': errors.token })}>
                             <label className="control-label">Bank token : </label>
@@ -168,8 +174,8 @@ export default class ConfirmPurchase extends React.Component {
                                 Cancel
                             </button>
                         </div>
-                         </div>   }
-                    </form>
+                         </div>   
+                    </form>}
                 </div>
             </div>
         </div>

@@ -10,26 +10,12 @@ var confirm = (req, res, next) => {
 module.exports = (app) => {
 
     app.use('/checkout', isLogged)
-    app.get('/confirm', confirm)
+    app.use('/confirm', isLogged)
 
     app.post('/checkout', (req, res) => {
         dbPurchase.checkout(req, res)
     })
 
-
-    // // tests ====TEST====
-    // app.get('/checkout/:cartId', (req, res) => {
-    //     console.log('get checkout on server')
-    //     req.params.data = " was in server"
-    //         // res.setHeader('Content-Type', 'application/json, text/plain, */*');
-    //     console.log(' params ====== ', req.params)
-    //     console.log(' body ====== ', req.body)
-    //         // res.writeHead(res.statusCode);
-    //     dbPurchase.checkout(req, res)
-
-    //     // res.write('get checkout success');
-
-    // })
 
     app.post('/confirm', (req, res) => {
         dbPurchase.getConfirmData(req, res)
@@ -45,18 +31,37 @@ module.exports = (app) => {
             }).catch(err => res.json({ error: err }))
     })
 
-    app.put('/confirm/:address', (req,res)=>{
+    app.put('/confirm/:address', (req, res)=>{
 
         const data = {
             from : config.shopAddress,
             to : req.params.address,
             email : req.user.email
         }
+        var arrivedDate = new Date(Date.now());
+        arrivedDate.setMonth(10);
+        console.log(arrivedDate)
         let url = config.deliveryUrl+`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
-        axios.post(url).then( res=>{
-            if(res.data.success === true) res.json({ trackcode : res.data.trackcode });
-            if(res.data.error ) res.json( res.data.error )
-        })
+        let response ={
+            data : {
+                success : true,
+                error : 'Some error message',
+                data : {
+                    track : 'sometrackcode',
+                    approxWillBeDelivered : arrivedDate
+                }
+            }
+        }  
+        // axios.post(url).then( response =>{
+            if(response.data.success) {
+                dbPurchase.setDeliveryData( response.data, req, res)
+                // res.json({ trackcode : res.data.trackcode });
+            }else{
+                
+                res.json( res.data.error );
+            }
+            
+        // })
     })
 
 }

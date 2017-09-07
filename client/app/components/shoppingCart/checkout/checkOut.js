@@ -74,16 +74,18 @@ class CheckOut extends React.Component {
                     <tr>
                         <td>   </td>
                         <td>   </td>
-                        <td className="text-center "><h3><strong>Total cost </strong></h3></td>
-                        <td className="text-right">
-                            <h3><strong>{this.state.purchasesSum} UAH</strong></h3></td>
+                        <td className="text-right "><h3><strong>Total cost :</strong></h3></td>
+                        <td className="text-center">
+                            <h3><span className="glyphicon glyphicon-usd" />
+                                <strong style={{fontSize:'26px'}}>{this.state.purchasesSum/100}</strong>
+                            </h3>
+                        </td>
                         <td>   </td>
 
                     </tr>
                     <tr>
                         <th>   </th>
                         <th>   </th>
-                        {/* <th>   </th> */}
                         <th>
                         <button type="button" className="btn btn-default" onClick={()=>browserHistory.push('/')}>
                             <span className="glyphicon glyphicon-shopping-cart" ></span> Continue Shopping
@@ -93,6 +95,7 @@ class CheckOut extends React.Component {
                         <button type="button" className="btn btn-success" onClick={this.confirmPurchase} >
                             Buy <span className="glyphicon glyphicon-play"></span>
                         </button></th>
+                        <th>   </th>
                     </tr>
                 </tbody>
             </table>}

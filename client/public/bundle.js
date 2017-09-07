@@ -38752,6 +38752,7 @@
 
 				items.map(function (item, index) {
 					if (item.accessible) {
+
 						item.cost = item.price * item.quantity;
 						total += item.cost;
 					} else {
@@ -38929,31 +38930,33 @@
 												),
 												_react2.default.createElement(
 													'th',
-													null,
-													' \xA0 '
-												),
-												_react2.default.createElement(
-													'th',
-													null,
-													_react2.default.createElement(
-														'h3',
-														null,
-														'Total'
-													)
-												),
-												_react2.default.createElement(
-													'th',
 													{ className: 'text-right' },
+													_react2.default.createElement('h3', null)
+												),
+												_react2.default.createElement(
+													'th',
+													{ className: 'col-md-3 text-left' },
 													_react2.default.createElement(
 														'h3',
 														null,
+														' ',
 														_react2.default.createElement(
 															'strong',
 															null,
-															this.state.totalSum,
-															' UAH'
+															'Total :'
+														),
+														_react2.default.createElement('span', { className: 'glyphicon glyphicon-usd', style: { marginLeft: '14px' } }),
+														_react2.default.createElement(
+															'strong',
+															{ className: 'text-center', style: { fontSize: '26px', marginLeft: '4px' } },
+															this.state.totalSum / 100
 														)
 													)
+												),
+												_react2.default.createElement(
+													'th',
+													null,
+													' \xA0 '
 												)
 											),
 											_react2.default.createElement(
@@ -39167,48 +39170,69 @@
 	                    item.priceWithDisc ? _react2.default.createElement(
 	                        'div',
 	                        null,
+	                        _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
 	                        _react2.default.createElement(
 	                            'strong',
-	                            { style: { color: '#fb515d' } },
-	                            item.priceWithDisc,
-	                            ' UAH'
+	                            { style: { color: '#fb515d', fontSize: '19px' } },
+	                            item.priceWithDisc / 100
 	                        ),
 	                        _react2.default.createElement(
 	                            'p',
 	                            null,
+	                            _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
 	                            _react2.default.createElement(
 	                                'del',
 	                                null,
-	                                item.price,
-	                                ' UAH'
+	                                item.price / 100
 	                            )
 	                        )
 	                    ) : _react2.default.createElement(
-	                        'strong',
+	                        'div',
 	                        null,
-	                        item.price,
-	                        ' UAH'
+	                        _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
+	                        ' ',
+	                        _react2.default.createElement(
+	                            'strong',
+	                            { style: { fontSize: '19px' } },
+	                            ' ',
+	                            item.price / 100
+	                        ),
+	                        ' '
 	                    )
 	                ),
 	                _react2.default.createElement(
 	                    'td',
 	                    { className: 'col-sm-1 col-md-2 text-center' },
 	                    _react2.default.createElement('p', null),
-	                    item.costWithDisc ? _react2.default.createElement(
-	                        'strong',
+	                    item.accessible ? item.costWithDisc ? _react2.default.createElement(
+	                        'div',
 	                        null,
-	                        item.costWithDisc,
-	                        ' UAH'
+	                        _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
+	                        _react2.default.createElement(
+	                            'strong',
+	                            { style: { fontSize: '19px' } },
+	                            ' ',
+	                            item.costWithDisc / 100
+	                        )
 	                    ) : _react2.default.createElement(
-	                        'strong',
+	                        'div',
 	                        null,
-	                        item.cost,
-	                        ' UAH'
+	                        _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
+	                        _react2.default.createElement(
+	                            'strong',
+	                            { style: { fontSize: '19px' } },
+	                            ' ',
+	                            item.cost / 100
+	                        )
+	                    ) : _react2.default.createElement(
+	                        'label',
+	                        null,
+	                        '-'
 	                    )
 	                ),
 	                this.props.checkOut ? _react2.default.createElement('td', null) : _react2.default.createElement(
 	                    'td',
-	                    { className: 'col-sm-1 col-md-1' },
+	                    { className: 'col-sm-1 col-md-1 text-center' },
 	                    _react2.default.createElement(
 	                        'p',
 	                        null,
@@ -39386,28 +39410,28 @@
 	                                    ),
 	                                    _react2.default.createElement(
 	                                        'td',
-	                                        { className: 'text-center ' },
+	                                        { className: 'text-right ' },
 	                                        _react2.default.createElement(
 	                                            'h3',
 	                                            null,
 	                                            _react2.default.createElement(
 	                                                'strong',
 	                                                null,
-	                                                'Total cost '
+	                                                'Total cost :'
 	                                            )
 	                                        )
 	                                    ),
 	                                    _react2.default.createElement(
 	                                        'td',
-	                                        { className: 'text-right' },
+	                                        { className: 'text-center' },
 	                                        _react2.default.createElement(
 	                                            'h3',
 	                                            null,
+	                                            _react2.default.createElement('span', { className: 'glyphicon glyphicon-usd' }),
 	                                            _react2.default.createElement(
 	                                                'strong',
-	                                                null,
-	                                                this.state.purchasesSum,
-	                                                ' UAH'
+	                                                { style: { fontSize: '26px' } },
+	                                                this.state.purchasesSum / 100
 	                                            )
 	                                        )
 	                                    ),
@@ -39451,6 +39475,11 @@
 	                                            'Buy ',
 	                                            _react2.default.createElement('span', { className: 'glyphicon glyphicon-play' })
 	                                        )
+	                                    ),
+	                                    _react2.default.createElement(
+	                                        'th',
+	                                        null,
+	                                        ' \xA0 '
 	                                    )
 	                                )
 	                            )
@@ -39511,6 +39540,7 @@
 	        var _this = _possibleConstructorReturn(this, (ConfirmPurchase.__proto__ || Object.getPrototypeOf(ConfirmPurchase)).call(this, props));
 
 	        _this.state = {
+	            purchaseId: "59b141c9053b128c99f7c020",
 	            badstatus: '',
 	            sum: '0',
 	            token: '',
@@ -39524,6 +39554,7 @@
 	        _this.onSubmit = _this.onSubmit.bind(_this);
 	        _this.onChange = _this.onChange.bind(_this);
 	        _this.validateInput = _this.validateInput.bind(_this);
+	        _this.goDeliver = _this.goDeliver.bind(_this);
 	        return _this;
 	    }
 
@@ -39536,7 +39567,7 @@
 	            _axios2.default.post('/confirm').then(function (response) {
 	                if (response.data.address) _this2.setState({ destination: response.data.address });
 	                _this2.setState({
-	                    sum: response.data.purchasesSum,
+	                    sum: response.data.purchasesSum / 100,
 	                    isLoading: false });
 	            });
 	        }
@@ -39592,7 +39623,7 @@
 	                if (res.data.error) {
 	                    _this3.setState({ badstatus: res.data.error });
 	                } else if (res) {
-	                    _this3.setState({ delivery: true });
+	                    _this3.setState({ delivery: true, purchaseId: res.data.cartId });
 	                }
 	            });
 	        }
@@ -39607,8 +39638,10 @@
 	            }
 	            if (!this.validateInput()) return;
 	            this.setState({ isLoading: true });
-	            _axios2.default.put('/confirm/' + this.state.destination).then(function (res) {
-	                var res = res.data.trackcode ? 'Your trackcode : ' + res.data.trackcode : res.data.error;
+	            console.log('goDEliver');
+	            _axios2.default.put('/confirm/' + this.state.destination, { id: this.state.purchaseId }).then(function (res) {
+	                console.log(res.data);
+	                var res = res.data.arrivedTime ? 'Your trackcode : ' + res.data.trackcode + ('.           Arrived time : ' + res.data.arrivedtime) : res.data.error;
 	                _this4.setState({ badstatus: res, isLoading: false });
 	            });
 	        }
@@ -39687,10 +39720,10 @@
 	                        _react2.default.createElement(
 	                            'div',
 	                            null,
-	                            _react2.default.createElement(
+	                            this.state.delivery ? delivery : _react2.default.createElement(
 	                                'form',
 	                                null,
-	                                this.state.delivery ? delivery : _react2.default.createElement(
+	                                _react2.default.createElement(
 	                                    'div',
 	                                    null,
 	                                    _react2.default.createElement(

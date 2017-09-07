@@ -8,6 +8,7 @@ var Purchase = new Schema({
     status: { type: String, require: true, unique: false },
     items: [],
     discount: { type: String, unique: false },
+    arrivedDate: { type: Date, unique: false},
     // discountSum: { type: Number, default: 0, unique: false },
     purchasesSum: { type: Number, default: 0, unique: false },
     purchasedDate: { type: Date, unique: false }

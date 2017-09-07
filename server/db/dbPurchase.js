@@ -160,7 +160,7 @@ exports.checkout = (req, res) => {
 }
 
 exports.confirmPurchase = (req, res) => {
-
+var cartId;
     Purchase.findOne({ userId : req.user._id.toString() , status : 'shoppingCart'}
     ).then( cart =>
         Purchase.findByIdAndUpdate(cart._id, {
@@ -175,6 +175,7 @@ exports.confirmPurchase = (req, res) => {
         if (!cart) throw new Error('Cannot confirm purchase')
         return Purchase.findById(cart._id)
     }).then( cart => { 
+        cartId = cart._id;
         return cart.userId;
     }).then(user_id =>
         Purchase.create({
@@ -184,9 +185,32 @@ exports.confirmPurchase = (req, res) => {
         })
     ).then(newcart => {
         if (!newcart) throw new Error('Cant create new shop cart')
-        res.send();
+        res.send({cartId : cartId});
     }).catch(err => {
         res.json({ error : err.message })
+    })
+}
+
+exports.setDeliveryData = ( delData, req, res)=>{
+    let id = req.body.id;
+    Purchase.findById( id ,'status purchasesSum')
+    // .lean()
+    .then( cart =>{
+        cart.arrivedDate = delData.data.approxWillBeDelivered;
+        // cart.deliveryToken = delData.data.track;
+        return cart.save()
+    }).then( savedCart => {
+        if(!savedCart) throw new Error('Something wrong!')
+        if(savedCart) {
+
+
+            Purchase.findById( id, (err,doc)=>console.log(doc) )
+            // console.log(savedCart)
+            res.json({ trackcode: delData.data.track, arrivedTime: delData.data.approxWillBeDelivered })
+        }
+    }).catch( err => {
+        console.log(err)
+        // res.json({ error: err.message});
     })
 }
 
@@ -203,12 +227,11 @@ exports.findUserHistory = (req, res) => {
         , '_id status purchasedDate purchasesSum ')
     .sort( [[sortedField , order ]])
     .exec( ( err, carts) => {
-        if(err) {console.log(err ) ; throw new Error(err.message)}
+        if(err)  throw new Error(err.message)
         let data = {
             dataLength : carts.length,
             purchases : carts.slice(beginOffset, endOffset)
         }
-        console.log('size :',data.dataLength, 'purchases size :', data.purchases.length)
         res.json(data)}
     ).catch(err => console.log("error in find all carts", err))
 }
