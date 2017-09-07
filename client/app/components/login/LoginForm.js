@@ -39,7 +39,7 @@ class LoginForm extends React.Component {
         email: this.state.email, 
         password: this.state.password
       }
-      axios.post('login',userData).then(
+      axios.post('/login',userData).then(
           (response)=>{ 
             this.props.login(response.data);
             this.setState({ isLoading : false })

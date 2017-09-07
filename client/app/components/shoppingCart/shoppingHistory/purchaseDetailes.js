@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import {browserHistory} from 'react-router';
+import {browserHistory } from 'react-router';
 import Item from '../item'
 
 export default class PurchaseDetailes extends React.Component {
@@ -32,7 +32,7 @@ export default class PurchaseDetailes extends React.Component {
         
           <div className="container">
                 <div className="row">
-                {this.props.isAuth ? 
+                
                     <div className="col-sm-12 col-md-10 col-md-offset-1">
                         
             { isLoading ? <div className="col-sm-12 col-md-10 col-md-offset-5">Loading data... Please wait</div>:
@@ -102,8 +102,7 @@ export default class PurchaseDetailes extends React.Component {
                     </tbody>
                 </table>}
             </div> 
-            : <p>You must be logged <Link to="/login" >Click to login</Link></p>
-            }
+            
             </div>
         </div> 
         );

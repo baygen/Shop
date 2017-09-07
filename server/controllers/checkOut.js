@@ -52,7 +52,8 @@ module.exports = (app) => {
             to : req.params.address,
             email : req.user.email
         }
-        axios.post(config.deliveryUrl, data).then( res=>{
+        let url = config.deliveryUrl+`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
+        axios.post(url).then( res=>{
             if(res.data.success === true) res.json({ trackcode : res.data.trackcode });
             if(res.data.error ) res.json( res.data.error )
         })

@@ -3,6 +3,6 @@ module.exports = {
     port: 3000,
     targetAccount : '5423530437436649',
     bankURL : 'https://funnybank.herokuapp.com/transfer',
-    deliveryURL : '',
+    deliveryURL : '/cars',
     shopAddress : 'Lviv , Doroshenka str, 23'
 }

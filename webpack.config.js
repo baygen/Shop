@@ -9,8 +9,8 @@ var APP_DIR = path.join(__dirname, 'client/app');
 var config = {
 	devtools:"eval-source-map",
 	
-	entry: [
-		APP_DIR + '/index.js'
+	entry : [ 
+		path.join(__dirname, 'client/app/index.js')
 		],
 	output: {
 		path: BUILD_DIR,
@@ -18,12 +18,12 @@ var config = {
 	},
 	resolve: {
 		root: [path.resolve(__dirname, 'client/app'), path.resolve(__dirname, 'node_modules')],
-		extensions: ['', '.js']
+		extensions: ['', '.js','.jsx']
 	},
 	module: {
 		loaders: [
 			{
-				test: /\.js?/,
+				test: /\.jsx?$/,
 				include: APP_DIR,
 				loader: 'babel-loader',
 				query: {
