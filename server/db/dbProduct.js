@@ -51,7 +51,7 @@ exports.listItem = (req, res) => {
         $and: [{ $or: 
                 [{ title: { $regex: regex } }, { desc: { $regex: regex } }]},
                 {price: { $gte: minPrice, $lte: maxPrice },}, { $or: a }
-                , { accessible : true} 
+                // , { accessible : true} 
             ]
     }).then( (doc)=> {
         var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };

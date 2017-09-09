@@ -38,21 +38,14 @@ module.exports = (app) => {
             to : req.params.address,
             email : req.user.email
         }
-        var arrivedDate = new Date(Date.now());
-        arrivedDate.setMonth(10);
         // console.log(arrivedDate)
         let url = config.deliveryURL+`/cars?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
-        let response ={
-            data : {
+        let response ={ data : {
                 success : true,
                 error : 'Some error message',
-                data : {
-                    track : 'sometrackcode',
-                    approxWillBeDelivered : arrivedDate
+                data : { track : 'sometrackcode', approxWillBeDelivered : arrivedDate}
                 }
             }
-        }  
-        // console.log(url) 
         // axios.get(url)
         // .then( response =>{
             console.log(response.data)

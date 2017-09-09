@@ -4,6 +4,7 @@ const Discount = require('../dbSchemas/discount');
 const _ = require('underscore');
 const config = require('../config')
 const Promise = require('bluebird');
+const axios = require('axios')
 
 
 exports.addItemToShoppingCart = (req, res) => {
@@ -11,35 +12,24 @@ exports.addItemToShoppingCart = (req, res) => {
     Purchase.findOne({
         userId: req.user._id.toString(),
         status: 'shoppingCart'
-    })
-    // .lean()
-    .then(cart => {
-        // console.log(cart)
+    }).then(cart => {
+
         if (!cart) throw new Error('Cant find cart!')
         let exist = false;
-        // var indDelete = [];
-         _.map(cart.items, ((item, index) => {
-            // if(item !== null && typeof item !== 'undefined'){
+        // remove bad items
+        let items = _.filter(cart.items, item => item!='undefined'&& item!=null)
+         _.map( items, (item, index) => {
             if (item._id === req.params.id) {
                 exist = true;
                 item.quantity += 1;
                 }
-                return item ;
-            // }else{ indDelete.push(index)}
-        }));
+            return item ;
+            });
         if (!exist) {
             let item = { _id: req.params.id, quantity: 1 };
-            cart.items.push(item);
+            items.push(item);
         }
-        // if(!!indDelete){
-        //     _.forEach(indDelete, index => cart.items.splice(indDelete,1) )
-        // }
-        // console.log(cart)
-        return Purchase.update({ _id: cart._id }, { $set: { items: cart.items } })
-        //  { new: true },
-            // ((err, cart) => { if (cart) res.send() }
-            //     )
-            // );
+        return Purchase.update({ _id: cart._id }, { $set: { items: items } })
     }).then( data =>{ 
         if(data.nModified != 1) throw new Error('Cant put item to cart')
         res.send()
@@ -55,15 +45,13 @@ exports.setNewItems = (req, res) => {
             { $set: 
                 { items: req.body , purchasesSum : req.params.totalSum} 
             },(err, data) => {
-                console.log(data.nModified != 1)
-            if (data)  res.send();
+            if (data.nModified == 1)  res.send();
         });
 }
 
 exports.getShoppingCart = (req, res) => {
     let cartItems;
     var cart;
-
 
     Purchase.findOne({
                 userId: req.user._id.toString(),
@@ -94,9 +82,8 @@ exports.setDiscountToCart = ( req, res)=>{
 
     Discount.findOne({ disCode : req.params.discontcode }
     ).then( discount =>{
-        if( !discount ) throw new Error ("discount didn't exist !");
-        if( discount.dateExpired < Date.now()) throw new Error('discount is outdated !');        
-        
+        if( !discount ) throw new Error ("discount don't exist !");
+        if( discount.dateExpired < Date.now()) throw new Error('discount is outdated !');
         return Purchase.findOne({ 
                         userId : req.user._id.toString(), 
                         status :'shoppingCart' },
@@ -136,45 +123,37 @@ exports.checkout = (req, res) => {
         }
     }).then( discount =>{
         let purchasesSum = 0;
-        // discountSum sum for discount values
-        var notAccesible = [];
-        let count = 0;
+        let count =0;
         let discountSum = 0;
         let itemsToBuy = _.map(cart.items, (item, index )=> {
-            if( typeof item == 'undefined'|| item === null){ notAccesible.push(index); return}
             let product = _.find( productsInCart, product => item._id == product._id);
-            if( product.accessible ){
                 var cost = product.price * item.quantity;
                 purchasesSum += cost;
                 item.cost = cost;
                 count += item.quantity;
 
-                    if( discount != null ){
-                        let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
-                        if( typeof discData !== 'undefined'){
-                            let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
-                            let costWithDisc = item.quantity * priceWithDisc;
-                            discountSum += cost - costWithDisc;
-                            item.priceWithDisc = priceWithDisc;
-                            item.costWithDisc = costWithDisc;
-                        }
-                    }
-                return _.extend({
+            if( discount != null ){
+                let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
+                if( typeof discData !== 'undefined'){
+                    let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
+                    let costWithDisc = item.quantity * priceWithDisc;
+                    discountSum += cost - costWithDisc;
+                    item.priceWithDisc = priceWithDisc;
+                    item.costWithDisc = costWithDisc;
+                }
+            }
+            return _.extend({
                         accessible : product.accessible,
                         img: product.img,
                         desc: product.desc,
                         title: product.title,
                         price: product.price
-                        }, item)
-            }else{
-                notAccesible.push(index);
-            }
-            
+                        }, item)            
         });
-        // remove all not actual products
-        _.forEach( notAccesible , index => itemsToBuy.splice(index,1) );
+        // remove all not accessible products
+        let accessible = _.filter( cart.items, item => item.accessible);
         let sum = purchasesSum - discountSum;
-        return { items : itemsToBuy, sum : sum, discountSum : discountSum};
+        return { items : accessible, sum : sum, discountSum : discountSum};
     }).then ( updData =>
         Purchase.findByIdAndUpdate( cart._id , 
             { $set: { 
@@ -250,36 +229,44 @@ exports.findUserHistory = (req, res) => {
     let proj = '_id status purchasedDate purchasesSum';
 
     var listSize;
-    var findWithFilter = Purchase.find(filter, proj).sort([[ sortedField , order ]]).skip(skip).limit(limit);
+
     Promise.all([
-        findWithFilter,
-        // Purchase.find(filter, proj).sort([[ sortedField , order ]]).skip(skip).limit(limit),
+        Purchase.find(filter, proj).sort([[ sortedField , order ]]).skip(skip).limit(limit),
         Purchase.count(filter)
     ])
     .spread((carts, count) => {
         listSize = count;
-        let delivering = _.map( carts, cart => cart.status == 'delivering')
-        
-        console.log(delivering)
-        // return Promise.all(_.map( carts, checkDeliveryUpdate)
-        let data = {
-            dataLength : count,
-            purchases : carts
+        let delivering = _.filter( carts, cart => cart.status == 'delivering')
+        console.log(delivering.length)
+        if( _.size(delivering) == 0) {
+            return carts
+        }else{
+        return Promise.all(_.map( carts, checkDeliveryUpdate))
         }
-        res.json(data)
-    // }).then( data =>{
-    //     return
-    })
-    .catch(err => console.log("error in find all carts", err))
+    }).then( data =>{
+        console.log(data.length)
+        return res.json({dataLength : listSize, purchases : data})
+    }).catch(err => console.log("error in find all carts", err))
 
     let checkDeliveryUpdate = (cart)=>{
-        if(cart.status != 'delivering') return cart;
-        axios.post(`/pathToDelivery/${cart.delivery.track}`)
+        return new Promise( resolve => {
+            if(cart.status != 'delivering'){
+            return resolve( cart );
+            }
+            //  delete row below after delivery server will be good
+            return resolve(cart);
+
+            axios.post(`http://localhost:3000/pathToDelivery/${cart.delivery.track}`)
             .then( response =>{
-                if(!response.data.status) return cart;
+                if (response.data.status == false) return cart;
                 return Purchase.findByIdAndUpdate(cart._id, 
-                        {$set:{status:'complete'}},{new: true});
-            })
+                            {$set:{status:'complete'}},{new: true});
+            }).then( data => {
+                // save
+                console.log(data.purchasesSum)
+                resolve(data);
+            }).catch( err => console.log(err))
+        })    
     }
 
 }

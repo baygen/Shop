@@ -27616,6 +27616,7 @@
 					_alertifyWebpack.log.error('You must be logged in store to shopping!');
 				} else {
 					_axios2.default.put('/shoppingcart/' + itemId).then(function (res) {
+						if (res.data) _alertifyWebpack.log.error('Oops!  Something bad happens...');
 						_alertifyWebpack.log.success('Added to cart!');
 					});
 				}

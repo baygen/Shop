@@ -117,6 +117,7 @@ addToCart(itemId){
 		log.error('You must be logged in store to shopping!')
 	}else{
 		axios.put(`/shoppingcart/${itemId}`).then(res=>{
+			if(res.data) log.error('Oops!  Something bad happens...')
 			log.success('Added to cart!')
 		});
 	}
