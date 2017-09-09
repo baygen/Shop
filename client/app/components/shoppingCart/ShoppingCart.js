@@ -80,8 +80,6 @@ export default class ShoppingCart extends React.Component {
 				if(!!item.costWithDisc) item.costWithDisc = 0;
 			}
 		});
-		console.log('after counted')
-		console.log(items)
 		this.setState({ items : items, totalSum : total }, ()=>this.updateDB() );
 	}
 

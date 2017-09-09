@@ -42,9 +42,11 @@ export default class Item extends React.Component {
               </div>
               <div className= "col-md-2">
                 <div className="panel-heading">
-                  <button className="btn-success btn-sm" onClick={()=>{this.addToCart(item._id)}}>
-                    <span className="glyphicon glyphicon-shopping-cart" ></span> add
-                  </button>
+                  { item.accessible ? <button className="btn-success btn-sm" onClick={()=>{this.addToCart(item._id)}}>
+                                        <span className="glyphicon glyphicon-shopping-cart" ></span> add
+                                      </button> 
+                                      : <span/>
+                  }
                 </div>
               </div>
             </div>
@@ -60,7 +62,7 @@ export default class Item extends React.Component {
                 <br/>
                 {item.desc}
                 <br/>
-                <h3 className=" text-right" ><strong>Price : {item.price} UAH</strong></h3>
+                <h3 className=" text-right" ><strong>{item.accessible ? "Price :"+ (item.price/100)+ '$': "not availiabe"}</strong></h3>
               </div>
               <div className= "col-md-4 text-center"> 
                 <strong><h3>Properties:</h3></strong>

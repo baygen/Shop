@@ -38,15 +38,15 @@ exports.saveProfile = (req,res)=>{
           name : req.body.name,
           email : req.body.email,
           phone : req.body.phone,
-          address : req.body.address
+          address : req.body.address,
+          bankCart : +req.body.bankCart
         }
       },
       { new : true },
       (err, newuser)=>{
         if(err)return res.send(err);
-
         req.login( newuser, err =>{
-          if(!err) res.send(newuser);
+          if(!err) res.send(newuser._id);
         });
       }
     );
@@ -92,7 +92,7 @@ exports.register = (req,res)=>{
             if(!err)res.send(newuser)
         })
       }
-  }).catch(err=>console.log(err));
+  }).catch(err=>res.json({error : err.message}));
 
 }
 

@@ -8,7 +8,7 @@ const userSchema = new Schema({
     address: { type: String, index: { unique: false }, default : '' },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, index: { unique: false } },
-    shoppingCart: { type: String }
+    bankCart: { type: Number, unique: false },
 });
 
 

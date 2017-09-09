@@ -8,11 +8,11 @@ export default class SearchProp extends React.Component {
 
    this.state = {
         props:[],
-        max: 300000,
+        max: 5000,
         min : 0,
         price: {
             min: 0,
-            max: 300000,
+            max: 5000,
           }
         }
  }

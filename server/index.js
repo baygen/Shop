@@ -71,6 +71,7 @@ passport.deserializeUser(
 mongoose.connect(config.dbURL
 	,{useMongoClient:true}
 );
+mongoose.Promise = require('bluebird');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 

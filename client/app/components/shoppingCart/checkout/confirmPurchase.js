@@ -2,14 +2,14 @@ import React from 'react';
 import axios from 'axios';
 import classnames from 'classnames';
 import { browserHistory } from 'react-router';
-
+import {dialog} from 'alertify-webpack'
 
 export default class ConfirmPurchase extends React.Component {
 	constructor(props){
 		super(props);
 
 		this.state = {
-            purchaseId :"59b141c9053b128c99f7c020",
+            purchasedCartId : '',
             badstatus : '',
             sum : '0',
             token : '',
@@ -30,12 +30,13 @@ export default class ConfirmPurchase extends React.Component {
         
         this.setState({ isLoading:true })
         axios.post('/confirm').then(response => {
-            if(response.data.address) this.setState({ destination : response.data.address })            
-            this.setState( { 
-                sum : response.data.purchasesSum/100,
-                isLoading : false }
-            )
-        });
+            response && this.setState( { 
+                            destination : response.data.address || '',
+                            cart : response.data.bankCart || '',
+                            sum : response.data.purchasesSum/100,
+                            isLoading : false 
+                        })
+        })
 	}
     
     onChange(e){
@@ -77,12 +78,17 @@ export default class ConfirmPurchase extends React.Component {
             sourceAccount : this.state.cart,
             token : this.state.token
         }
-
+        
         axios.put('/confirm',data).then( res =>{
                 if(res.data.error) {
-                    this.setState({ badstatus : res.data.error } )
+                    this.setState({ badstatus : res.data.error })
                 }else if( res ){
-                    this.setState({ delivery : true, purchaseId : res.data.cartId})
+                    this.setState({ purchaseCartId : res.data.cartId
+                        },()=>dialog.confirm('Your order is paid! Wish you order delivery?'
+                        , () => this.setState( { delivery : true}
+                                        ,()=>console.log('input after state') )
+                        ,()=> browserHistory.push('/') )
+                    );
                 }
             }
         )
@@ -94,15 +100,15 @@ export default class ConfirmPurchase extends React.Component {
             return;
         }
         if(!this.validateInput() ) return ;
-        this.setState({ isLoading : true})
+        // this.setState({ isLoading : true})
         console.log('goDEliver')
-        axios.put(`/confirm/${this.state.destination}`,{id:this.state.purchaseId}).then( res=>{
-            console.log(res.data)
-            var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
-                                                +`.           Arrived time : ${res.data.arrivedtime}`
-                                         : res.data.error;
-            this.setState({ badstatus : res, isLoading : false })
-        })
+        // axios.put(`/confirm/${this.state.destination}`,{id:this.state.purchasedCartId}).then( res=>{
+        //     console.log(res.data)
+        //     var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
+        //                                         +`.           Arrived time : ${res.data.arrivedtime}`
+        //                                  : res.data.error;
+        //     this.setState({ badstatus : res, isLoading : false })
+        // })
     }
 
 
@@ -130,7 +136,7 @@ export default class ConfirmPurchase extends React.Component {
     <div class="container">  	
         <div className="row">
             <div className="col-md-4 col-md-offset-5">
-                <h3>Fill the form :</h3>
+                <h3>{ this.state.delivery ? 'Type or change address :' : 'Fill the form :' }</h3>
             </div>
         </div>
 
@@ -162,7 +168,7 @@ export default class ConfirmPurchase extends React.Component {
                         </div>
 
                         <div className={classnames("form-group")}>
-                            <label className="control-label">Sum : {sum}</label>
+                            <label className="control-label">Sum : {sum} $</label>
                         </div>
                         
                         <div className="form-group">

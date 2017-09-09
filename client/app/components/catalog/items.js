@@ -21,7 +21,7 @@ export default class ItemsPage extends React.Component {
                 </li>
 
                 <li class="list-group-item">
-                    <h4>{this.props.item.price} UAH</h4>  
+                    <h4>{this.props.item.price/100} $</h4>  
                 </li>
 
               </ui>              

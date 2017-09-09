@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "alertify-webpack": "^0.2.1",
     "autoprefixer-loader": "^3.2.0",
     "axios": "^0.16.2",
     "babel-core": "^6.21.0",
@@ -21,6 +22,7 @@
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-0": "^6.16.0",
     "bcrypt": "^1.0.3",
+    "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "classnames": "^2.2.5",
     "css-loader": "^0.28.5",

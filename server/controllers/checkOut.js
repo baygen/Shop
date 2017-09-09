@@ -40,8 +40,8 @@ module.exports = (app) => {
         }
         var arrivedDate = new Date(Date.now());
         arrivedDate.setMonth(10);
-        console.log(arrivedDate)
-        let url = config.deliveryUrl+`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
+        // console.log(arrivedDate)
+        let url = config.deliveryURL+`/cars?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
         let response ={
             data : {
                 success : true,
@@ -52,16 +52,19 @@ module.exports = (app) => {
                 }
             }
         }  
-        // axios.post(url).then( response =>{
+        // console.log(url) 
+        // axios.get(url)
+        // .then( response =>{
+            console.log(response.data)
             if(response.data.success) {
-                dbPurchase.setDeliveryData( response.data, req, res)
-                // res.json({ trackcode : res.data.trackcode });
+                // dbPurchase.setDeliveryData( response.data, req, res)
+                res.json({ trackcode : res.data.trackcode });
             }else{
                 
                 res.json( res.data.error );
             }
             
-        // })
+        // }).catch( err => console.log(err))
     })
 
 }

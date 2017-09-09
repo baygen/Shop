@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { browserHistory } from 'react-router';
 import ReactPaginate from 'react-paginate';
+import {log} from 'alertify-webpack'
 
 //custom components
 import ItemsPage from 'components/catalog/items';
@@ -113,9 +114,11 @@ handlePropsRemove(name,value){
 
 addToCart(itemId){
 	if( !this.props.isAuth ) {
-        browserHistory.push('/login');
+		log.error('You must be logged in store to shopping!')
 	}else{
-		axios.put(`/shoppingcart/${itemId}`);
+		axios.put(`/shoppingcart/${itemId}`).then(res=>{
+			log.success('Added to cart!')
+		});
 	}
   }
 

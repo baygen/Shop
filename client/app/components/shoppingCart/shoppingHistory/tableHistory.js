@@ -7,7 +7,7 @@ import { BootstrapTable, TableHeaderColumn} from  'react-bootstrap-table';
 import '../css/react-bootstrap-table-all.min.css';
 
 function priceFormatter(cell, row) {
-    return ` ${cell} UAH`;
+    return ` ${cell/100} $`;
 }
 
 function dateFormatter( cell, row){
@@ -24,14 +24,14 @@ export default class TableHistory extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      purchases: [],
-      loading : false,
-      totalSize : 0,
-      currentPage : 1,
-      sizePerPage : 10,
-      id : '',
-      field : 'purchasedDate',
-      sortOrder : 'desc'
+          purchases: [],
+          loading : false,
+          totalSize : 0,
+          currentPage : 1,
+          sizePerPage : 10,
+          id : '',
+          field : 'purchasedDate',
+          sortOrder : 'desc'
     };
     this.onSizePerPageList = this.onSizePerPageList.bind(this)
     this.onPageChange = this.onPageChange.bind(this)
@@ -39,80 +39,81 @@ export default class TableHistory extends React.Component {
     this.pop = this.pop.bind(this)
   }
 
-componentWillMount(){
-    
-        this.setState({ loading : true })
-        axios.post('/shoppinghistory').then(res=>{
-            if(res.data){
-              console.log(res.data.dataLength)
-                this.setState({ purchases : res.data.purchases, 
-                  loading : false, 
-                  totalSize : res.data.dataLength })
-            }
-            this.setState({ loading : false })
-        })
-}
-
-onSortChange(sortName, sortOrder) {
-  const beginOffset = (this.state.currentPage - 1) * this.state.sizePerPage;
-  const endOffset = beginOffset + this.state.sizePerPage;
-  let params = {
-        beginOffset : beginOffset,
-        endOffset : endOffset,
-        field : sortName,
-        order : sortOrder
+  componentWillMount(){
+      this.setState({ loading : true })
+      let params = {
+        page : this.state.currentPage,
+        pageSize : this.state.sizePerPage,
+        field : 'purchasedDate',
+        sortOrder : 'desc'
       }
 
-  axios.post(`/shoppinghistory`,params).then( res => 
-      this.setState({
-          field : sortName,
-          sortOrder : sortOrder,
-          purchases : res.data.purchases,
-          totalSize : res.data.dataLength
+      axios.post('/shoppinghistory', params
+      ).then(response =>{
+          if(response.data){
+                  this.setState({ 
+                      purchases : response.data.purchases,
+                      totalSize : response.data.dataLength,
+                      loading : false })
+          }
+          this.setState({ loading : false })
       })
-  )
-}
-
-onPageChange(page, sizePerPage) {
-  const beginOffset = (page - 1) * sizePerPage;
-  const endOffset = beginOffset+sizePerPage;
-  let data={
-    beginOffset : beginOffset,
-    endOffset : endOffset,
-    field : this.state.field,
-    order : this.state.sortOrder
   }
-  axios.post(`/shoppinghistory`, data ).then( res => 
-          this.setState({
-                purchases : res.data.purchases,
-                currentPage : page,
-                totalSize : res.data.dataLength
-          })
-  )
-}
 
-onSizePerPageList( sizePerPage ) {
-  const beginOffset = (this.state.currentPage - 1) * sizePerPage;
-  const endOffset = beginOffset + sizePerPage;
-  let data = {
-    beginOffset : beginOffset,
-    endOffset : endOffset,
-    field : this.state.field,
-    order : this.state.sortOrder
+  onSortChange(sortName, sortOrder) {
+    let params = {
+          page : this.state.currentPage,
+          pageSize : this.state.sizePerPage,
+          field : sortName,
+          order : sortOrder
+        }
+
+    axios.post(`/shoppinghistory`,params)
+    .then( response => 
+        this.setState({
+            field : sortName,
+            sortOrder : sortOrder,
+            purchases : response.data.purchases,
+            totalSize : response.data.dataLength
+        })
+    )
   }
-  axios.post(`/shoppinghistory`, data ).then( res => 
-    this.setState({
-          totalSize : res.data.dataLength,
-          purchases : res.data.purchases,
-          sizePerPage : sizePerPage
-    })
-  )
-}
 
-pop (row ){
-  console.log(`You click row id: ${row._id} with price is: ${row.purchasesSum}`);
-  browserHistory.push(`shoppinghistory/${row._id}`)
-}
+  onPageChange(page, sizePerPage) {
+    let params = {
+      page : page,
+      pageSize : sizePerPage,
+      field : this.state.field,
+      order : this.state.sortOrder
+    }
+    axios.post(`/shoppinghistory`, params ).then( response => 
+            this.setState({
+                  purchases : response.data.purchases,
+                  currentPage : page,
+                  totalSize : response.data.dataLength
+            })
+    )
+  }
+
+  onSizePerPageList( sizePerPage ) {
+    let params = {
+      page : this.state.currentPage,
+      pageSize : sizePerPage,
+      field : this.state.field,
+      order : this.state.sortOrder
+    }
+    axios.post(`/shoppinghistory`, params ).then( response => 
+      this.setState({
+            totalSize : response.data.dataLength,
+            purchases : response.data.purchases,
+            sizePerPage : sizePerPage
+      })
+    )
+  }
+
+  pop (row ){
+    browserHistory.push(`shoppinghistory/${row._id}`)
+  }
 
   render() {
 

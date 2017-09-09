@@ -13,7 +13,8 @@ export default class Profile extends React.Component {
             phone : '',
             email : '',
             address : '',
-            saved : '',            
+            bankCart :'',
+            saved : '',      
             loading : false
         }
         this.onSubmit = this.onSubmit.bind(this);
@@ -28,10 +29,10 @@ export default class Profile extends React.Component {
         e.preventDefault();
         this.setState({ loading : true})        
         axios.put('/profile',this.state).then( response=>{
-            if(response.data._id){
+            if(response.data){
                 this.setState({ saved:'Changes are saved!', loading : false});
                 this.props.login(this.state.name);
-            }else{  
+            }else{
                 this.setState({saved:"This email already exist, try another", loading : false});
             }
         }).catch(err=>{
@@ -49,7 +50,8 @@ export default class Profile extends React.Component {
                     name: user.name,
                     email: user.email,
                     phone: user.phone,
-                    address : user.address ? user.address : '',
+                    address : user.address || '',
+                    bankCart : user.bankCart || '',
                     loading : false
                 });}
         });
@@ -64,7 +66,7 @@ export default class Profile extends React.Component {
 
 	<div className="row">
     <div className="col-md-2 col-md-offset-5">
-            <h3>Personal info</h3>
+            <h3 style={{marginLeft:'24px'}}>Personal info</h3>
         </div>
       <div className="col-md-8 col-md-offset-2 personal-info">
       {saved && <div className="alert alert-success alert-dismissible" role="alert"><h4 className="col-md-offset-5">{saved}</h4></div>}
@@ -116,7 +118,19 @@ export default class Profile extends React.Component {
               />
             </div>
           </div>
-          
+
+          <div className="form-group">
+            <label className="col-lg-3 control-label">Bank cart :</label>
+            <div className="col-lg-8">
+            <input className="form-control" 
+              type="text" 
+              name="bankCart"
+              value={this.state.bankCart}
+              onChange={this.onChange}
+              />
+            </div>
+          </div>
+
           <div className="form-group">
             <label className="col-md-3 control-label"></label>
             <div className="col-md-8">

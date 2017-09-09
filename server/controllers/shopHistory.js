@@ -14,4 +14,5 @@ module.exports = (app) => {
         dbPurchase.findPurchaseById( req.params.id , res );
     })
     
+    
 }
