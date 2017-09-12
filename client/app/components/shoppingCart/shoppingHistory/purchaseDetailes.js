@@ -19,7 +19,7 @@ export default class PurchaseDetailes extends React.Component {
                 cart: {},
                 isLoading : false
             }
-        
+        this.orderDelivery = this.orderDelivery.bind(this);
       }
     
     componentWillMount(){
@@ -34,15 +34,22 @@ export default class PurchaseDetailes extends React.Component {
     }
     
     orderDelivery(){
+        let id = this.state.cart._id;
         dialog.prompt('Type destination'
                 , (input)=>{
-                    // axios.put(`/confirm/${input}`
-                    //     ).then( response =>{
-                            let message = 'succes';
+                    
+                    axios.put(`/confirmdeliver/${input}`, {id : id}
+                        ).then( response =>{
+                            console.log(response.data)
+                            if (response.data.track ){
+                             dialog.alert("Success order");
+                                this.componentWillMount();
+                            }
                             // response.error ? response.error : 'Success';
-                            dialog.alert(message+" "+input);
-                            if(message != 'success') this.orderDelivery();
-                        // })
+                            if (response.data.error ){
+                            dialog.alert(response.data.error)
+                            this.orderDelivery()}
+                        })
                 },()=>{}
         )
         console.log(this.state.cart._id)
@@ -62,6 +69,7 @@ export default class PurchaseDetailes extends React.Component {
 
                 <table className="table table-hover">
                     <thead>
+                        
                         <tr>
                             <th className="text-right" >
                                 <strong>Order id : </strong>
@@ -92,7 +100,7 @@ export default class PurchaseDetailes extends React.Component {
                             <th className="text-right"><strong>Status : </strong></th>
                             <th style={{ color:'red'}}>{cart.status.toUpperCase()} </th>
                             { cart.delivery ? <th className="text-right">Arrived time:</th> : <th> </th>}
-                            { cart.delivery ? <th className="text-left"> {dateFormatter(cart.delivery.arrivedDate) }</th> 
+                            { cart.delivery ? <th className="text-left"> {dateFormatter(cart.delivery.arrivedTime) }</th> 
                                             : cart.status === 'paid' ? <th>
                                                                             <button className="btn btn-info" onClick={this.orderDelivery.bind(this)}>
                                                                                 Order Delivery

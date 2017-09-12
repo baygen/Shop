@@ -1,5 +1,5 @@
 const dbPurchase = require('../db/dbPurchase')
-const isLogged = require('./isLogged')
+const isLogged = require('../middleWare/isLogged')
     
 
 module.exports = (app) => {

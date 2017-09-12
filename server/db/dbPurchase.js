@@ -9,14 +9,12 @@ const axios = require('axios')
 
 exports.addItemToShoppingCart = (req, res) => {
 
-    Purchase.findOne({
-        userId: req.user._id.toString(),
-        status: 'shoppingCart'
-    }).then(cart => {
-
+    let filter = { userId: req.user._id.toString(), status: 'shoppingCart' };
+    
+    Purchase.findOne(filter).then(cart => {
         if (!cart) throw new Error('Cant find cart!')
         let exist = false;
-        // remove bad items
+
         let items = _.filter(cart.items, item => item!='undefined'&& item!=null)
          _.map( items, (item, index) => {
             if (item._id === req.params.id) {
@@ -40,24 +38,21 @@ exports.addItemToShoppingCart = (req, res) => {
 }
 
 exports.setNewItems = (req, res) => {
+    let updated = { items: req.body , purchasesSum : req.params.totalSum}; 
 
     Purchase.update({ userId: req.user._id.toString(), status: 'shoppingCart'},
-            { $set: 
-                { items: req.body , purchasesSum : req.params.totalSum} 
-            },(err, data) => {
+            { $set: updated }, (err, data) => {
             if (data.nModified == 1)  res.send();
-        });
+    });
 }
 
 exports.getShoppingCart = (req, res) => {
     let cartItems;
     var cart;
-
     Purchase.findOne({
                 userId: req.user._id.toString(),
                 status: 'shoppingCart'
-            },
-            'items'
+            },'items'
         ).lean()
         .then(data => {
             cart = data;
@@ -70,7 +65,7 @@ exports.getShoppingCart = (req, res) => {
                 let item = _.find(cart.items, item => item._id == product._id);
                 return _.extend({ quantity: item.quantity }, product);
             })
-            res.json({cartId : cart._id, result : result})
+            res.json({ cartId : cart._id, result : result })
         })
         .catch(err => {
             console.log(err)
@@ -100,37 +95,33 @@ exports.setDiscountToCart = ( req, res)=>{
 }
 
 exports.checkout = (req, res) => {
+    let current = new Date(),
+        startTime = current.getTime();
     var cart;
-    var productsInCart;
-    var discData;
 
-    // let /
+    let filter = { userId: req.user._id.toString(),status: 'shoppingCart'}
 
-    Purchase.findOne({
-        userId: req.user._id.toString(),
-        status: 'shoppingCart'
-    }, 'items discount').lean()
+    Purchase.findOne( filter, 'items discount')
     .then(data => {
         cart = data;
         let ids = _.map(data.items, item => item._id );
-        return Product.find({ _id: { $in: ids } }, '_id title img price accessible').lean();
-    }).then(products => {
-        productsInCart = products;
-        if( cart.discount ){
-            return Discount.findOne({ disCode : cart.discount });
-        }else{
-            return null;
-        }
-    }).then( discount =>{
-        let purchasesSum = 0;
-        let count =0;
-        let discountSum = 0;
-        let itemsToBuy = _.map(cart.items, (item, index )=> {
-            let product = _.find( productsInCart, product => item._id == product._id);
-                var cost = product.price * item.quantity;
-                purchasesSum += cost;
-                item.cost = cost;
-                count += item.quantity;
+        return Promise.all([
+                Product.find({ _id: { $in: ids }, accessible : true }, '_id title img price discount')
+                // .lean()
+                ,
+                Discount.findOne({ disCode : data.discount })
+            ])
+    }).spread( (products, discount) => {
+        
+        let purchasesSum = 0,
+            discountSum = 0;
+
+        let itemsToBuy = _.map(products, (product, index )=> {
+            let item = _.find( cart.items, item => item._id == product._id);
+                
+            var cost = product.price * item.quantity;
+            purchasesSum += cost;
+            item.cost = cost;
 
             if( discount != null ){
                 let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
@@ -150,27 +141,26 @@ exports.checkout = (req, res) => {
                         price: product.price
                         }, item)            
         });
-        // remove all not accessible products
-        let accessible = _.filter( cart.items, item => item.accessible);
+
         let sum = purchasesSum - discountSum;
-        return { items : accessible, sum : sum, discountSum : discountSum};
-    }).then ( updData =>
+        return { items : itemsToBuy, 
+                 purchasesSum : +sum,
+                 discountSum : +discountSum };
+    }).then ( refreshedData =>
         Purchase.findByIdAndUpdate( cart._id , 
-            { $set: { 
-                items: updData.items , 
-                purchasesSum : +updData.sum,
-                discountSum : +updData.discountSum } 
-            }, {new : true} )
+            { $set: refreshedData }, {new : true} )
     ).then( result => {
         if (!result) throw new Error("cannot update cart to buy")
-        res.json(result)
+        res.json(result);
+        let endTime = new Date();
+        console.log(' Checkout, Promise.all() execute time is : ',endTime-startTime)
     }).catch(err => console.log(err));
 
 }
 
 exports.confirmPurchase = (req, res) => {
     
-    var cartId;
+    var paidCartId;
     let filter = { userId : req.user._id.toString() , status : 'shoppingCart'};
 
     Purchase.findOne( filter
@@ -178,41 +168,38 @@ exports.confirmPurchase = (req, res) => {
         let newData = { status: 'paid', purchasedDate: Date.now() }
         return Purchase.findByIdAndUpdate( cart._id, { $set: newData})
     }).then( cart => { 
-        cartId = cart._id;
+        paidCartId = cart._id;
         return cart.userId;
     }).then(user_id =>  Purchase.create({
                                     userId: user_id,
                                     status: 'shoppingCart',
                                     date: Date.now()
                                 })
-    ).then(newcart => res.send({cartId : cartId})
+    ).then(newcart => res.send({ cartId : paidCartId })
     ).catch(err => {
         res.json({ error : err.message })
     })
 }
 
 exports.setDeliveryData = ( deliveryData, req, res)=>{
-    let filter = { _id : req.body.id, status: 'paid'}
+    let filter = { _id : req.body.id};
 
     Purchase.findOne( filter ,'status purchasesSum'
     ).then( cart =>{
         cart.status = 'delivering';
         cart.delivery = {
-            arrivedTime : delData.data.approxWillBeDelivered,
-            track : delData.data.track
+            arrivedTime : deliveryData.beDelivered,
+            track : deliveryData.track
         }
         return cart.save()
     }).then( savedCart => {
-        console.log(savedCart)
         if(!savedCart) throw new Error('Something wrong!')
-        // Purchase.findById( id, (err,doc) => console.log(doc) )
-        res.json({ 
-            trackcode: deliveryData.data.track, 
-            arrivedTime: deliveryData.data.approxWillBeDelivered 
+        res.json({
+            track : savedCart.delivery.track, 
+            beDelivered : savedCart.delivery.beDelivered 
         })
     }).catch( err => {
-        console.log(err)
-        // res.json({ error : err.message});
+        res.json({ error : err.message});
     })
 }
 
@@ -221,12 +208,11 @@ exports.findUserHistory = (req, res) => {
     let sortedField = req.body.field || "purchasedDate" ;
     let order = req.body.order ? req.body.order === 'asc' ? 1 : -1 
                                 : -1 ;
-    
-    let limit = (req.body.pageSize || 10)
+    let limit = req.body.pageSize || 10 ;
     var skip = req.body.page ? (req.body.page - 1)*limit : 0 ;
 
     let filter = { userId: req.user._id , status: { $in: ['delivering','complete','paid'] } };
-    let proj = '_id status purchasedDate purchasesSum';
+    let proj = '_id status purchasedDate purchasesSum delivery';
 
     var listSize;
 
@@ -237,35 +223,30 @@ exports.findUserHistory = (req, res) => {
     .spread((carts, count) => {
         listSize = count;
         let delivering = _.filter( carts, cart => cart.status == 'delivering')
-        console.log(delivering.length)
+        
         if( _.size(delivering) == 0) {
             return carts
         }else{
-        return Promise.all(_.map( carts, checkDeliveryUpdate))
+            return Promise.all(_.map( carts, checkDeliveryUpdate))
         }
     }).then( data =>{
-        console.log(data.length)
-        return res.json({dataLength : listSize, purchases : data})
+        return res.json({ dataLength : listSize, purchases : data })
     }).catch(err => console.log("error in find all carts", err))
 
     let checkDeliveryUpdate = (cart)=>{
         return new Promise( resolve => {
-            if(cart.status != 'delivering'){
-            return resolve( cart );
+            
+            if(cart.status != 'delivering' || typeof cart.delivery == 'undefined'){
+                return resolve( cart );
             }
-            //  delete row below after delivery server will be good
-            return resolve(cart);
-
-            axios.post(`http://localhost:3000/pathToDelivery/${cart.delivery.track}`)
-            .then( response =>{
-                if (response.data.status == false) return cart;
-                return Purchase.findByIdAndUpdate(cart._id, 
-                            {$set:{status:'complete'}},{new: true});
-            }).then( data => {
-                // save
-                console.log(data.purchasesSum)
-                resolve(data);
-            }).catch( err => console.log(err))
+            
+            axios.get(`${config.deliveryToCheckURL}/${cart.delivery.track}`)
+            .then( response => {
+                if (response.data.status != "completed") return cart;
+                return Purchase.findByIdAndUpdate( cart._id, 
+                            { $set: { status: 'complete'}}, { new: true });
+            }).then( data => resolve(data)
+            ).catch( err => console.log(err.message))
         })    
     }
 

@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+const autoIncrement = require('mongoose-auto-increment')
 
 var Purchase = new Schema({
 
@@ -9,10 +10,16 @@ var Purchase = new Schema({
     items: [],
     discount: { type: String, unique: false },
     delivery : {},
-    // discountSum: { type: Number, default: 0, unique: false },
     purchasesSum: { type: Number, default: 0, unique: false },
     purchasedDate: { type: Date, unique: false }
 });
 
+Purchase.plugin( autoIncrement.plugin,{
+    model: 'Book',
+    field: 'orderId',
+    type: 'String',
+    startAt: 100000,
+    incrementBy: 1
+})
 
 module.exports = mongoose.model('purchases', Purchase);

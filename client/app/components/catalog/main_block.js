@@ -5,9 +5,9 @@ import ReactPaginate from 'react-paginate';
 import {log} from 'alertify-webpack'
 
 //custom components
-import ItemsPage from 'components/catalog/items';
-import SearchProp from 'components/catalog/search_prop';
-import Properties from 'components/catalog/properties'
+import ItemsPage from './items';
+import SearchProp from './search_prop';
+import Properties from './properties'
 
 import './css/catalog.css';
 

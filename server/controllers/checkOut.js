@@ -1,5 +1,5 @@
 const dbPurchase = require('../db/dbPurchase')
-const isLogged = require('./isLogged');
+const isLogged = require('../middleWare/isLogged');
 const config = require('../config')
 const axios = require('axios')
 
@@ -31,33 +31,24 @@ module.exports = (app) => {
             }).catch(err => res.json({ error: err }))
     })
 
-    app.put('/confirm/:address', (req, res)=>{
+    app.put('/confirmdeliver/:address', (req, res)=>{
 
-        const data = {
-            from : config.shopAddress,
-            to : req.params.address,
-            email : req.user.email
-        }
-        // console.log(arrivedDate)
-        let url = config.deliveryURL+`/cars?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
-        let response ={ data : {
-                success : true,
-                error : 'Some error message',
-                data : { track : 'sometrackcode', approxWillBeDelivered : arrivedDate}
-                }
-            }
-        // axios.get(url)
-        // .then( response =>{
-            console.log(response.data)
-            if(response.data.success) {
-                // dbPurchase.setDeliveryData( response.data, req, res)
-                res.json({ trackcode : res.data.trackcode });
-            }else{
-                
-                res.json( res.data.error );
-            }
-            
-        // }).catch( err => console.log(err))
+        let url = config.deliveryToAddURL+`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
+        
+        axios.get(url)
+        .then( response =>{
+            console.log('reponse data controllers checkout :',response.data)
+            if( response.data.success === false) throw new Error(response.data.error);
+                let resData = response.data.data;
+                let deliveryData = { track : resData.track,
+                                    beDelivered : resData.beDeliveredDateFormat||resData.beDelivered
+                                }
+                console.log( "track" , resData.track );
+                dbPurchase.setDeliveryData( deliveryData, req, res)
+        }).catch( err => {
+            console.log(err);
+            res.json({error : err.message});
+        })
     })
 
 }

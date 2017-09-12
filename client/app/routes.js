@@ -13,6 +13,7 @@ import CheckOut from './components/shoppingCart/checkout/checkOut'
 import ConfirmPurchase from './components/shoppingCart/checkout/confirmPurchase'
 import TableHistory from './components/shoppingCart/shoppingHistory/tableHistory'
 import PurchaseDetailes from './components/shoppingCart/shoppingHistory/purchaseDetailes'
+import NotFound from './components/notFound'
 
 
 import Item from './components/catalog/Item';
@@ -31,6 +32,7 @@ export default (
           <Route path="shoppinghistory/:id" component={PurchaseDetailes} />
           <Route path="checkout" component={CheckOut}/>
           <Route path="confirm" component={ConfirmPurchase} />
+          <Route path="*" component={NotFound}/>
     </Route>
     </div>
 )

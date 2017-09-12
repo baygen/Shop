@@ -102,7 +102,7 @@ export default class ConfirmPurchase extends React.Component {
         if(!this.validateInput() ) return ;
         // this.setState({ isLoading : true})
         console.log('goDEliver')
-        // axios.put(`/confirm/${this.state.destination}`,{id:this.state.purchasedCartId}).then( res=>{
+        // axios.put(`/confirmdeliver/${this.state.destination}`,{id:this.state.purchasedCartId}).then( res=>{
         //     console.log(res.data)
         //     var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
         //                                         +`.           Arrived time : ${res.data.arrivedtime}`

@@ -1,6 +1,7 @@
 const Product = require('../dbSchemas/product');
 var PER_PAGE = 10;
-const _ = require('underscore')
+const _ = require('underscore');
+const Promise = require('bluebird')
 
 function getPaginatedItems(items, offset) {
     return items.slice(offset, offset + 12);
@@ -19,14 +20,25 @@ exports.findItem = (id, res) => {
     });
 }
 
+exports.getMinMaxPrices = (res)=>{
+
+    let filter = { accessible: true};
+    Promise.all([
+        Product.findOne( filter,'price').sort('-price').limit(1),
+        Product.findOne( filter,'price').sort('price').limit(1)
+    ]).spread( (expensive, cheapest) =>{
+        res.json({ max: expensive.price, min: cheapest.price })
+    }).catch(err=>console.log(err));
+}
+
 exports.listItem = (req, res) => {
 
     var offset = req.query.page ? parseInt(req.query.page, 10) : 0;
     var nextOffset = offset + PER_PAGE;
     var previousOffset = (offset - PER_PAGE < 1) ? 0 : offset - PER_PAGE;
     var filter = req.query.search ? req.query.search : '';
-    var minPrice = req.query.minPrice ? req.query.minPrice*100 : 0;
-    var maxPrice = req.query.maxPrice ? req.query.maxPrice*100 : 1000000;
+    var minPrice = req.query.minPrice ? req.query.minPrice * 100 : 0;
+    var maxPrice = req.query.maxPrice ? req.query.maxPrice * 100 : 1000000;
     var props = req.query.props ? JSON.parse(req.query.props) : [];
 
     
@@ -50,10 +62,10 @@ exports.listItem = (req, res) => {
     Product.find({
         $and: [{ $or: 
                 [{ title: { $regex: regex } }, { desc: { $regex: regex } }]},
-                {price: { $gte: minPrice, $lte: maxPrice },}, { $or: a }
-                // , { accessible : true} 
+                { price: { $gte: minPrice, $lte: maxPrice },}, { $or: a }
+                , { accessible : true} 
             ]
-    }).then( (doc)=> {
+    }).then( doc=> {
         var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };
         //.sort({price:1})
         res.send(data);

@@ -1,12 +1,6 @@
-const passport = require('passport');
-const isEmpty = require ('lodash/isEmpty');
 const dbUser = require ('../db/dbUser');
 const dbProduct = require('../db/dbProduct');
-const dbPurchase = require('../db/dbPurchase')
-const axios = require('axios')
-const config = require('../config')
-const isLogged = require('./isLogged')
-
+const passport = require('passport')
 
 module.exports = (app) => {
 
@@ -21,7 +15,10 @@ module.exports = (app) => {
       }
     }
   );
-  
+  app.post('/itemprices', (req, res )=>
+    dbProduct.getMinMaxPrices( res)
+  )
+
 
   app.post('/register',
     (req,res)=>dbUser.register(req,res)
@@ -42,26 +39,6 @@ module.exports = (app) => {
         }
       }
   );
-
-  // app.get('/Product',
-  //   (req, res) => {
-  //     dbProduct.listProduct(req, res);
-  //   }
-  // )
-
-  // app.post('/Product',
-  //   (req, res) => {
-  //     dbProduct.createProduct(req.body)
-  //       .then(data => res.send(data));
-  //   }
-  // );
-
-  // app.get('/Product/:id',
-  //   (req, res) => {
-  //     db.findItem(req.params.id)
-  //         .then(data => res.send(data));
-  //   }
-  // )
 
   app.post('/item/:id', (req , res)=>{
     dbProduct.findItem( req.params.id, res)    

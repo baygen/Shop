@@ -75,6 +75,7 @@ mongoose.Promise = require('bluebird');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+require('mongoose-auto-increment').initialize(db);
 
 app.use(express.static(path.join(__dirname,'../client')));
 

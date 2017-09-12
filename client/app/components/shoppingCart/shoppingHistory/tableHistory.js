@@ -11,9 +11,14 @@ function priceFormatter(cell, row) {
 }
 
 function dateFormatter( cell, row){
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];  
   var date='  ';
+  let curdate = new Date(cell)
+  
+  let dayOfWeek = days[curdate.getDay()];
+  date += cell.slice(11,13)+':'+cell.slice(14,16) + " "+ dayOfWeek+ ", ";
   date += cell.slice(8,10) + '/'+cell.slice(5,7)+'/'+cell.slice(0,4);
-  date += " "+cell.slice(11,13)+':'+cell.slice(14,16);
+  
   
   return date;
 }

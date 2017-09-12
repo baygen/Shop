@@ -1,6 +1,6 @@
 const dbUser = require('../db/dbUser');
 
-const isLogged = require('./isLogged')
+const isLogged = require('../middleWare/isLogged')
 
 module.exports = (app) => {
 
