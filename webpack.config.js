@@ -7,7 +7,8 @@ var APP_DIR = path.join(__dirname, 'client/app');
 
 
 var config = {
-	devtools:"eval-source-map",
+	devtools: "cheap-module-source-map",
+	// "eval-source-map",
 	
 	entry : [ 
 		path.join(__dirname, 'client/app/index.js')
@@ -40,7 +41,14 @@ var config = {
 			},
 			
 		]
-	}
+	},
+	plugins: [
+		new webpack.DefinePlugin({
+		  'process.env': {
+			'NODE_ENV': JSON.stringify('production')
+		  }
+		})
+	  ]
 
 };
 
