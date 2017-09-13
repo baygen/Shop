@@ -7,7 +7,7 @@ import { BootstrapTable, TableHeaderColumn} from  'react-bootstrap-table';
 import '../css/react-bootstrap-table-all.min.css';
 
 function priceFormatter(cell, row) {
-    return ` ${cell/100} $`;
+    return cell%100 == 0 ? cell/100+'.00 $': cell/100+' $';
 }
 
 function dateFormatter( cell, row){
@@ -36,12 +36,14 @@ export default class TableHistory extends React.Component {
           sizePerPage : 10,
           id : '',
           field : 'purchasedDate',
-          sortOrder : 'desc'
+          sortOrder : 'desc',
+          process: false
     };
     this.onSizePerPageList = this.onSizePerPageList.bind(this)
     this.onPageChange = this.onPageChange.bind(this)
     this.onSortChange = this.onSortChange.bind(this)
-    this.pop = this.pop.bind(this)
+    this.pop = this.pop.bind(this);
+    this.noData = this.noData.bind(this);
   }
 
   componentWillMount(){
@@ -72,14 +74,15 @@ export default class TableHistory extends React.Component {
           field : sortName,
           order : sortOrder
         }
-
+        this.setState({process:true})
     axios.post(`/shoppinghistory`,params)
     .then( response => 
         this.setState({
             field : sortName,
             sortOrder : sortOrder,
             purchases : response.data.purchases,
-            totalSize : response.data.dataLength
+            totalSize : response.data.dataLength,
+            process:false
         })
     )
   }
@@ -91,11 +94,13 @@ export default class TableHistory extends React.Component {
       field : this.state.field,
       order : this.state.sortOrder
     }
+    this.setState({process:true})
     axios.post(`/shoppinghistory`, params ).then( response => 
             this.setState({
                   purchases : response.data.purchases,
                   currentPage : page,
-                  totalSize : response.data.dataLength
+                  totalSize : response.data.dataLength,
+                  process:false
             })
     )
   }
@@ -107,14 +112,24 @@ export default class TableHistory extends React.Component {
       field : this.state.field,
       order : this.state.sortOrder
     }
+    this.setState({process:true})
     axios.post(`/shoppinghistory`, params ).then( response => 
       this.setState({
             totalSize : response.data.dataLength,
             purchases : response.data.purchases,
-            sizePerPage : sizePerPage
+            sizePerPage : sizePerPage,
+            process : false
       })
     )
   }
+  noData(){
+    if(this.state.totalSize ===0){
+      return 'No data'
+    }else if(this.state.process){
+      return "Please wait..."
+    }
+  }
+
 
   pop (row ){
     browserHistory.push(`shoppinghistory/${row._id}`)
@@ -122,9 +137,9 @@ export default class TableHistory extends React.Component {
 
   render() {
 
-    const { purchases, loading , totalSize} = this.state;
-    const tableHeight = ( 39 * (this.state.sizePerPage + 1)) + 'px';
-
+    const { purchases, loading , totalSize, process} = this.state;
+    const tableHeight = totalSize > this.state.sizePerPage ? ( 39 * (this.state.sizePerPage + 1)) + 'px'
+                                                                  : ( 39 * (totalSize + 1)) + 'px';
     const options = {
       sizePerPageList: [ {
           text: '5', value: 5
@@ -139,7 +154,8 @@ export default class TableHistory extends React.Component {
         onSizePerPageList : this.onSizePerPageList,
         paginationPosition : 'top',
         onSortChange : this.onSortChange,
-        onRowClick : this.pop 
+        onRowClick : this.pop ,
+        // noDataText : this.noData()
     };
     
     const selectRowProp = {
@@ -152,6 +168,8 @@ export default class TableHistory extends React.Component {
     return (
       
         <div>{ loading ? <div className="col-sm-12 col-md-10 col-md-offset-5"> Loading data...</div> :
+        <div>
+               <div className="col-sm-12 col-md-10 col-md-offset-5"> { process ? <label>Loading data...</label>:<label >&nbsp;</label>}</div>
               <BootstrapTable data = { purchases } 
                               striped = { true }
                               pagination = { true }
@@ -167,7 +185,8 @@ export default class TableHistory extends React.Component {
                                      dataFormat={ dateFormatter } >Purchased date</TableHeaderColumn>
                   <TableHeaderColumn dataField='status' dataSort = { true } >Status</TableHeaderColumn>
                   <TableHeaderColumn dataField='purchasesSum' dataSort={ true } dataFormat={ priceFormatter }>Order Price</TableHeaderColumn>
-              </BootstrapTable>}
+              </BootstrapTable>
+              </div>}
         </div>
     );
   }

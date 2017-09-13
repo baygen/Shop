@@ -83,8 +83,12 @@ controllers.set(app);
 
 app.get('/*', (req, res) => {
 	res.sendFile(path.join(__dirname, '../client/index.html'));
-	
 });
-
+app.post('/*', (req, res) => {
+	res.sendFile(path.join(__dirname, '../client/index.html'));
+});
+app.put('/*', (req, res) => {
+	res.sendFile(path.join(__dirname, '../client/index.html'));
+});
 
 module.exports.start = () => app.listen( process.env.PORT ||config.port, () => console.log('App listening on port '+ config.port));

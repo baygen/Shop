@@ -4,6 +4,8 @@ import { Link } from 'react-router';
 export default class ItemsPage extends React.Component {
 
     render() {
+      const price = this.props.item.price;
+      let curPrice = (price % 100 === 0) ? price/100+'.00 $': price/100+' $';
       
       return (
         <div className="snip1423" key={this.props.item._id}>
@@ -21,7 +23,7 @@ export default class ItemsPage extends React.Component {
                 </li>
 
                 <li class="list-group-item">
-                    <h4>{this.props.item.price/100} $</h4>  
+                    { this.props.item.accessible ? <h3>{ curPrice }</h3> : <h4>---</h4>}
                 </li>
 
               </ui>              

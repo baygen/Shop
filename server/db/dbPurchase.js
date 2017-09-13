@@ -8,32 +8,34 @@ const axios = require('axios')
 
 
 exports.addItemToShoppingCart = (req, res) => {
-
     let filter = { userId: req.user._id.toString(), status: 'shoppingCart' };
+    let date = new Date(), start = date.getTime();
     
-    Purchase.findOne(filter).then(cart => {
+
+    Purchase.findOne(filter)
+    .then(cart => {
         if (!cart) throw new Error('Cant find cart!')
         let exist = false;
 
-        let items = _.filter(cart.items, item => item!='undefined'&& item!=null)
-         _.map( items, (item, index) => {
+        // let items = _.filter(cart.items, _.isObject)
+        _.each( cart.items, (item, index) => {
             if (item._id === req.params.id) {
                 exist = true;
                 item.quantity += 1;
                 }
-            return item ;
+                return item;
             });
         if (!exist) {
             let item = { _id: req.params.id, quantity: 1 };
-            items.push(item);
+            cart.items.push(item);
         }
-        return Purchase.update({ _id: cart._id }, { $set: { items: items } })
+        return cart.update({ $set: {items : cart.items }});
     }).then( data =>{ 
-        if(data.nModified != 1) throw new Error('Cant put item to cart')
-        res.send()
+        let end = new Date();
+        console.log('each:',end.getTime()-start)
+        res.json({ success : true })
     }).catch(err => {
-        res.json({ error : err.message});
-        console.log(err);
+        res.json({ success : false });
     })
 }
 
@@ -41,36 +43,43 @@ exports.setNewItems = (req, res) => {
     let updated = { items: req.body , purchasesSum : req.params.totalSum}; 
 
     Purchase.update({ userId: req.user._id.toString(), status: 'shoppingCart'},
-            { $set: updated }, (err, data) => {
-            if (data.nModified == 1)  res.send();
-    });
+        { $set: updated 
+    }).then( data => {
+        if (data.nModified == 1)  {
+            res.send({success: true})
+        }else{
+            res.send({success: false})
+        }
+    }).catch( err => {
+        console.log(err.message)
+        res.send({success: false})
+    })
 }
 
 exports.getShoppingCart = (req, res) => {
     let cartItems;
     var cart;
+    
     Purchase.findOne({
                 userId: req.user._id.toString(),
                 status: 'shoppingCart'
             },'items'
-        ).lean()
-        .then(data => {
+    ).lean()
+    .then(data => {
             cart = data;
             if (!data) throw new Error('Cart not found.');
             let ids = _.map(cart.items, item => item._id );
             return Product.find({ _id: { $in: ids } }).lean();
-        })
-        .then(products => {
+    }).then(products => {
             let result = _.map(products, product => {
                 let item = _.find(cart.items, item => item._id == product._id);
                 return _.extend({ quantity: item.quantity }, product);
-            })
+            })            
             res.json({ cartId : cart._id, result : result })
-        })
-        .catch(err => {
+    }).catch(err => {
             console.log(err)
-            res.send();
-        })
+            res.json({ success : false});
+    })
 }
 
 exports.setDiscountToCart = ( req, res)=>{
@@ -79,6 +88,7 @@ exports.setDiscountToCart = ( req, res)=>{
     ).then( discount =>{
         if( !discount ) throw new Error ("discount don't exist !");
         if( discount.dateExpired < Date.now()) throw new Error('discount is outdated !');
+        
         return Purchase.findOne({ 
                         userId : req.user._id.toString(), 
                         status :'shoppingCart' },
@@ -87,7 +97,7 @@ exports.setDiscountToCart = ( req, res)=>{
         purchase.discount = req.params.discontcode;
         return purchase.save()
     }).then(  doc =>{
-            res.send();
+            res.json({ success : true});
     }).catch(err => {
             res.json(err.message)
     });
@@ -95,20 +105,17 @@ exports.setDiscountToCart = ( req, res)=>{
 }
 
 exports.checkout = (req, res) => {
-    let current = new Date(),
-        startTime = current.getTime();
     var cart;
 
     let filter = { userId: req.user._id.toString(),status: 'shoppingCart'}
 
-    Purchase.findOne( filter, 'items discount')
-    .then(data => {
+    Purchase.findOne( filter, 'items discount purchasesSum')
+    .then( data => {
         cart = data;
         let ids = _.map(data.items, item => item._id );
         return Promise.all([
-                Product.find({ _id: { $in: ids }, accessible : true }, '_id title img price discount')
-                // .lean()
-                ,
+                Product.find({ _id: { $in: ids }, accessible : true }, '_id title img price discount accessible')
+                .lean(),
                 Discount.findOne({ disCode : data.discount })
             ])
     }).spread( (products, discount) => {
@@ -116,10 +123,11 @@ exports.checkout = (req, res) => {
         let purchasesSum = 0,
             discountSum = 0;
 
-        let itemsToBuy = _.map(products, (product, index )=> {
-            let item = _.find( cart.items, item => item._id == product._id);
+        let itemsToBuy = _.map(products, product => {
+            var item = _.find( cart.items, item => item._id == product._id);
                 
-            var cost = product.price * item.quantity;
+            let cost = product.price * item.quantity;
+            item.accessible = product.accessible;
             purchasesSum += cost;
             item.cost = cost;
 
@@ -134,27 +142,25 @@ exports.checkout = (req, res) => {
                 }
             }
             return _.extend({
-                        accessible : product.accessible,
                         img: product.img,
                         desc: product.desc,
                         title: product.title,
-                        price: product.price
+                        price: product.price,
                         }, item)            
         });
-
         let sum = purchasesSum - discountSum;
         return { items : itemsToBuy, 
                  purchasesSum : +sum,
                  discountSum : +discountSum };
     }).then ( refreshedData =>
-        Purchase.findByIdAndUpdate( cart._id , 
-            { $set: refreshedData }, {new : true} )
+        Purchase.findByIdAndUpdate(cart._id,{ $set: refreshedData }, {new : true})
     ).then( result => {
         if (!result) throw new Error("cannot update cart to buy")
         res.json(result);
-        let endTime = new Date();
-        console.log(' Checkout, Promise.all() execute time is : ',endTime-startTime)
-    }).catch(err => console.log(err));
+    }).catch(err => {
+        console.log(err)
+        res.send({success : false})
+    });
 
 }
 
@@ -165,16 +171,15 @@ exports.confirmPurchase = (req, res) => {
 
     Purchase.findOne( filter
     ).then( cart =>{
-        let newData = { status: 'paid', purchasedDate: Date.now() }
-        return Purchase.findByIdAndUpdate( cart._id, { $set: newData})
-    }).then( cart => { 
         paidCartId = cart._id;
-        return cart.userId;
-    }).then(user_id =>  Purchase.create({
-                                    userId: user_id,
-                                    status: 'shoppingCart',
-                                    date: Date.now()
-                                })
+        cart.status = 'paid';
+        cart.purchasedDate = Date.now();
+        return cart.save();
+    }).then( cart => 
+        Purchase.create({
+                userId: req.user._id,
+                status: 'shoppingCart',
+                date: Date.now() })
     ).then(newcart => res.send({ cartId : paidCartId })
     ).catch(err => {
         res.json({ error : err.message })
@@ -183,6 +188,7 @@ exports.confirmPurchase = (req, res) => {
 
 exports.setDeliveryData = ( deliveryData, req, res)=>{
     let filter = { _id : req.body.id};
+    console.log('filter: ', filter)
 
     Purchase.findOne( filter ,'status purchasesSum'
     ).then( cart =>{
@@ -193,26 +199,28 @@ exports.setDeliveryData = ( deliveryData, req, res)=>{
         }
         return cart.save()
     }).then( savedCart => {
+        console.log("delivery set result :",savedCart)
         if(!savedCart) throw new Error('Something wrong!')
         res.json({
             track : savedCart.delivery.track, 
             beDelivered : savedCart.delivery.beDelivered 
         })
     }).catch( err => {
+        console.log(err)
         res.json({ error : err.message});
     })
 }
 
 exports.findUserHistory = (req, res) => {
-    
+    let inputOrder = req.body.order || 'desc';
+    let order = inputOrder ==='asc' ? 1 : -1 ;
+
     let sortedField = req.body.field || "purchasedDate" ;
-    let order = req.body.order ? req.body.order === 'asc' ? 1 : -1 
-                                : -1 ;
     let limit = req.body.pageSize || 10 ;
     var skip = req.body.page ? (req.body.page - 1)*limit : 0 ;
 
     let filter = { userId: req.user._id , status: { $in: ['delivering','complete','paid'] } };
-    let proj = '_id status purchasedDate purchasesSum delivery';
+    let proj = '_id status purchasedDate purchasesSum delivery orderId';
 
     var listSize;
 
@@ -222,32 +230,30 @@ exports.findUserHistory = (req, res) => {
     ])
     .spread((carts, count) => {
         listSize = count;
-        let delivering = _.filter( carts, cart => cart.status == 'delivering')
-        
-        if( _.size(delivering) == 0) {
-            return carts
-        }else{
+        if( _.some(carts, cart => cart.status === 'delivering')) {
             return Promise.all(_.map( carts, checkDeliveryUpdate))
+        }else{
+            return carts;
         }
     }).then( data =>{
         return res.json({ dataLength : listSize, purchases : data })
     }).catch(err => console.log("error in find all carts", err))
 
     let checkDeliveryUpdate = (cart)=>{
-        return new Promise( resolve => {
-            
-            if(cart.status != 'delivering' || typeof cart.delivery == 'undefined'){
-                return resolve( cart );
-            }
-            
-            axios.get(`${config.deliveryToCheckURL}/${cart.delivery.track}`)
-            .then( response => {
-                if (response.data.status != "completed") return cart;
-                return Purchase.findByIdAndUpdate( cart._id, 
+        
+        if(cart.status !== 'delivering' || typeof cart.delivery === undefined){
+            return Promise.resolve( cart );
+        }
+        return axios.get(`${config.deliveryToCheckURL}/${cart.delivery.track}`)
+                .then( response => {
+                    if (response.data.status !== "completed") 
+                        return cart;
+                    return Purchase.findByIdAndUpdate( cart._id, 
                             { $set: { status: 'complete'}}, { new: true });
-            }).then( data => resolve(data)
-            ).catch( err => console.log(err.message))
-        })    
+                }).catch( err => {
+                console.log(err.message)
+                return Promise.resolve(cart)
+            })
     }
 
 }
@@ -255,14 +261,8 @@ exports.findUserHistory = (req, res) => {
 exports.findPurchaseById = ( id , res)=>{
     
     Purchase.findById( id
-    ).then( cart => res.send(cart)
-    ).catch( err => console.log(err))
-}
-
-exports.delPurchase = (req, res) => {
-    Purchase.remove({ _id: req.body._id }, err => {
-        if (!err) this.findAllCart(req, res);
-    })
+    ).then( cart => res.json(cart))
+    .catch( err => console.log(err))
 }
 
 exports.getConfirmData = (req, res) => {

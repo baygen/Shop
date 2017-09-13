@@ -37,7 +37,6 @@ module.exports = (app) => {
         
         axios.get(url)
         .then( response =>{
-            console.log('reponse data controllers checkout :',response.data)
             if( response.data.success === false) throw new Error(response.data.error);
                 let resData = response.data.data;
                 let deliveryData = { track : resData.track,
@@ -47,7 +46,7 @@ module.exports = (app) => {
                 dbPurchase.setDeliveryData( deliveryData, req, res)
         }).catch( err => {
             console.log(err);
-            res.json({error : err.message});
+            res.json({error : 'Sorry, something unexpected happens!'});
         })
     })
 

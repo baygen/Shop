@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-
+import {log} from 'alertify-webpack';
 
 
 export default class Item extends React.Component {
@@ -20,7 +20,15 @@ export default class Item extends React.Component {
   }
 
   addToCart(id){
-    axios.put(`/shoppingcart/${id}`)
+    if ( !this.props.isAuth) return log.error('You must be logged in store to shopping!');
+    
+    axios.put(`/shoppingcart/${id}`).then(res=>{
+			if(res.data.error){
+				log.error('Oops!  Something bad happens...')
+			}else{
+				log.success('Added to cart!')
+			}
+		});
   }
 
   render() {

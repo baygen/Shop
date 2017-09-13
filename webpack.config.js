@@ -35,7 +35,6 @@ var config = {
 			{
 				test: /\.css$/,
 				include: path.join(__dirname),
-				// APP_DIR,
 				loader: "style-loader!css-loader!autoprefixer-loader",
 				exclude: [ /public/]
 			},

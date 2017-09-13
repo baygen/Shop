@@ -61,15 +61,21 @@ export default class Profile extends React.Component {
 	render() {
         const { saved}=this.state;
         
-            return (
+            
+        return (
+
     <div class="container">  	
 
 	<div className="row">
     <div className="col-md-2 col-md-offset-5">
+    
             <h3 style={{marginLeft:'24px'}}>Personal info</h3>
         </div>
       <div className="col-md-8 col-md-offset-2 personal-info">
+
       {saved && <div className="alert alert-success alert-dismissible" role="alert"><h4 className="col-md-offset-5">{saved}</h4></div>}
+      { this.state.loading ? <div className="col-sm-12 col-md-10 col-md-offset-4"><h3>Loading data... Please wait</h3></div>:
+
       <div class="jumbotron">
         <form className="form-horizontal" role="form" >
           <div className="form-group">
@@ -145,8 +151,9 @@ export default class Profile extends React.Component {
           </div>
         </form>
         </div>
-
+      }
       </div>
+    
   </div>
 </div>
 

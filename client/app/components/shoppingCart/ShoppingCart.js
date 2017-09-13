@@ -61,18 +61,17 @@ export default class ShoppingCart extends React.Component {
 
 		var newitems = this.state.items;
 		newitems[i].quantity = +newamount;
-		newitems[i].cost = newamount*newitems[i].price;
+		newitems[i].cost = newamount * newitems[i].price;
 		
-		this.updateData();	
+		this.updateData();
 		 
 	}
 
 	updateData(){
 		var total=0;
 		const {items} = this.state;
-		items.map((item, index)=>{
+		items.map( (item, index)=>{
 			if(item.accessible ){
-				
 				item.cost = item.price * item.quantity;
 				total += item.cost;
 			}else{
@@ -105,6 +104,9 @@ export default class ShoppingCart extends React.Component {
 		}
 
 	}
+	formatPrice( price){
+        return (price % 100 === 0) ? price/100+'.00 $': price/100+' $';    
+    }
 
 	render() {
 		const{items, message, isLoading, isUpdating}=this.state;
@@ -177,9 +179,9 @@ export default class ShoppingCart extends React.Component {
                         <th className="text-right"><h3></h3></th>
                         <th className="col-md-3 text-left">
 							<h3> <strong>Total :</strong> 			
-								<span className="glyphicon glyphicon-usd" style={{marginLeft:'14px'}}/>
+								
 								<strong className="text-center" style={{fontSize:'26px',marginLeft:'4px'}}>
-									{this.state.totalSum/100}
+									{this.formatPrice(this.state.totalSum)}
 								</strong>
 							</h3>
 						</th>

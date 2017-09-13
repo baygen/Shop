@@ -48,7 +48,14 @@ export default class Editpassword extends React.Component {
             this.setState({ loading : true})
             axios.post('/editpassword', this.state)
                  .then( res => res.data._id ? 'saved' : res.data )
-                 .then ( mes => this.setState({ message : mes, loading : false }) )
+                 .then ( mes => this.setState({ 
+                                    message : mes, 
+                                    loading : false,
+                                    oldPassword:'',
+                                    newPassword: '',
+                                    newPasswordConfirmation:'',
+                                 })
+                 )
         }
     }
 
@@ -70,7 +77,8 @@ export default class Editpassword extends React.Component {
                         <h3>Edit password</h3>
                     </div>
                     <div className="col-md-6 col-md-offset-5">
-                        {message && <p className = "text-danger"><h5> {message} </h5></p>}
+                        {message && message ==='saved' ? <p className = "text-success"><h5> {message} </h5></p>
+                                                       : <p className = "text-danger"><h5> {message} </h5></p>}
                     </div>
                     <div className="col-md-9 col-md-offset-1 personal-info">
                         

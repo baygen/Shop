@@ -2,13 +2,6 @@ const User = require('../dbSchemas/user');
 const Purchase = require('../dbSchemas/purchase');
 const bcrypt = require('bcrypt')
 
-
-// exports.findAllUsers = (req,res)=>{
-//   User.find({},(err, users)=>{
-//     return res.json(users);
-//   })
-// }
-
 exports.editPassword = (req, res) => {
     bcrypt.compare(req.body.oldPassword, req.user.password
     ).then(res => {
@@ -52,8 +45,8 @@ exports.findCurrentUser = (req, res) => {
 
 exports.register = (req, res) => {
     var newuser;
-    bcrypt.hash(req.body.password, 10).then(hash => {
-
+    bcrypt.hash(req.body.password, 10)
+    .then(hash => {
         newuser = new User({
             name: 'new User',
             phone: '',
@@ -63,17 +56,11 @@ exports.register = (req, res) => {
 
         return User.create(newuser)
     }).then(user => {
-
-        console.log(user)
         newuser = user;
         let cart = { userId: user._id, status: 'shoppingCart', date: Date.now() }
-
         return Purchase.create(cart);
     }).then(cart => {
-
         if (cart) {
-            console.log("shopcart created");
-
             req.login(newuser, err => {
                 if (!err) res.send(newuser)
             })

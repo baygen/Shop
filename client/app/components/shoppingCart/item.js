@@ -22,9 +22,28 @@ export default class ItemView extends React.Component {
         var desc = this.props.item.desc ? this.props.item.desc.slice(0,110) : '';
         this.setState({ desc : desc.concat('...') })
     }
+
+    formatPrice( price){
+        return (price % 100 === 0) ? price/100+'.00': price/100;    
+    }
     
     render(){
         const item = this.props.item;
+        const itemCost = item.costWithDisc ? <div>
+                            <span className="glyphicon glyphicon-usd" />
+                            <strong style={{fontSize:'19px'}} > {this.formatPrice(item.costWithDisc)}</strong>
+                        </div> 
+                        : <div>
+                        <span className="glyphicon glyphicon-usd" />
+                        <strong style={{fontSize:'19px'}}> {this.formatPrice(item.cost)}</strong>
+                        </div> ;
+
+        let itemAccessible = item.accessible ?<input type="Number" 
+                                                    name="amount"
+                                                    className="form-control"  
+                                                    onChange={this.onChange}    
+                                                    value={this.props.item.quantity}/>
+                                              : <label>not availiable</label>
 
         return(
             <tr>
@@ -50,14 +69,7 @@ export default class ItemView extends React.Component {
                 <td className="col-sm-1 col-md-1 text-center" >
                 <p> </p>
                 {this.props.checkOut ? <div className="media-body"><h4 className="media-heading">{item.quantity}</h4></div>
-                                     :   item.accessible ?
-                                        <input type="Number" 
-                                            name="amount"
-                                            className="form-control"  
-                                            onChange={this.onChange}    
-                                            value={this.props.item.quantity}
-                                        /> : <label>not availiable</label>
-                }
+                                     : itemAccessible }
             
                 </td>
             
@@ -65,30 +77,23 @@ export default class ItemView extends React.Component {
                 <p> </p>
                 { item.priceWithDisc ? <div><span className="glyphicon glyphicon-usd" />
                                         <strong style={{color:'#fb515d',fontSize:'19px'}} >
-                                           {item.priceWithDisc/100}
+                                           {this.formatPrice(item.priceWithDisc)}
                                         </strong>
                                       <p><span className="glyphicon glyphicon-usd" /> 
                                           <del>
-                                          {item.price/100}
+                                          {this.formatPrice(item.price)}
                                           </del>
                                       </p>
                                       </div>
-                                    : <div><span className="glyphicon glyphicon-usd" /> <strong style={{fontSize:'19px'}}> {item.price/100}</strong> </div>
+                                    : <div><span className="glyphicon glyphicon-usd" /> 
+                                            <strong style={{fontSize:'19px'}}> {this.formatPrice(item.price)}</strong> 
+                                      </div>
                 }
             </td>
 
             <td className="col-sm-1 col-md-2 text-center">
                 <p></p>
-                { item.accessible && (item.accessible ? item.costWithDisc ? <div>
-                                                            <span className="glyphicon glyphicon-usd" />
-                                                            <strong style={{fontSize:'19px'}} > {item.costWithDisc/100}</strong>
-                                                        </div> 
-                                                      : <div>
-                                                          <span className="glyphicon glyphicon-usd" />
-                                                          <strong style={{fontSize:'19px'}}> {item.cost/100}</strong>
-                                                        </div>
-                                 : <label>-</label> )
-                }
+                { item.accessible === true ? itemCost : <label>-</label> }
 
             </td>
 

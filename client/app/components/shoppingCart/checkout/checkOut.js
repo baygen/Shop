@@ -39,7 +39,7 @@ class CheckOut extends React.Component {
   }
 
   render() {
-    const{items , isLoading } = this.state;
+    const{items , isLoading ,purchasesSum} = this.state;
 
     return (
 
@@ -92,7 +92,7 @@ class CheckOut extends React.Component {
                         <td className="text-right "><h3><strong>Total cost :</strong></h3></td>
                         <td className="text-center">
                             <h3><span className="glyphicon glyphicon-usd" />
-                                <strong style={{fontSize:'26px'}}>{this.state.purchasesSum/100}</strong>
+                                <strong style={{fontSize:'26px'}}>{purchasesSum%100 === 0 ? purchasesSum/100+'.00':purchasesSum/100}</strong>
                             </h3>
                         </td>
                         <td><h3 style={{ marginTop:'15px'}}>

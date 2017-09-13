@@ -25,7 +25,8 @@ export default class MainBlock extends React.Component {
 			data: [],
 			offset: 0,
 			search:'',
-			props:[]
+			props:[],
+			isLoading : false
 		}
 	}
 
@@ -115,10 +116,15 @@ handlePropsRemove(name,value){
 addToCart(itemId){
 	if( !this.props.isAuth ) {
 		log.error('You must be logged in store to shopping!')
-	}else{
-		axios.put(`/shoppingcart/${itemId}`).then(res=>{
-			if(res.data) log.error('Oops!  Something bad happens...')
-			log.success('Added to cart!')
+	}else if( !this.state.isLoading ){
+		this.setState({isLoading : true})
+		axios.put(`/shoppingcart/${itemId}`).then(res =>{
+			if(res.data.success){
+				log.success('Added to cart!')				
+			}else{
+				log.error('Oops!  Something bad happens...')
+			}
+			this.setState({ isLoading : false})
 		});
 	}
   }

@@ -57,13 +57,13 @@ exports.listItem = (req, res) => {
     var flag = 'gi'
     filter = "^(.*?)(" + filter + ")(.*)$";
     var regex = new RegExp(filter, flag);
-//  TODO accesible
+
     /*Find in BD*/
     Product.find({
         $and: [{ $or: 
                 [{ title: { $regex: regex } }, { desc: { $regex: regex } }]},
                 { price: { $gte: minPrice, $lte: maxPrice },}, { $or: a }
-                , { accessible : true} 
+                // , { accessible : true} 
             ]
     }).then( doc=> {
         var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };

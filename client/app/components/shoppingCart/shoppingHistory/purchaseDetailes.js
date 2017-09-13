@@ -4,11 +4,14 @@ import {browserHistory } from 'react-router';
 import Item from '../item';
 import {dialog} from 'alertify-webpack'
 
-function dateFormatter( cell ){
+function dateFormatter( cell, del ){
     var date=' ';
+    if(del){
+        date += "After "+cell.slice(11,13)+':00 ';
+    }else{
+        date += cell.slice(11,13)+':'+cell.slice(14,16)+' ';
+    }
     date += cell.slice(8,10) + '/'+cell.slice(5,7)+'/'+cell.slice(0,4);
-    date += " "+cell.slice(11,13)+':'+cell.slice(14,16);
-    
     return date;
   }
 
@@ -37,7 +40,7 @@ export default class PurchaseDetailes extends React.Component {
         let id = this.state.cart._id;
         dialog.prompt('Type destination'
                 , (input)=>{
-                    
+                    this.setState({ isLoading: true})
                     axios.put(`/confirmdeliver/${input}`, {id : id}
                         ).then( response =>{
                             console.log(response.data)
@@ -45,6 +48,7 @@ export default class PurchaseDetailes extends React.Component {
                              dialog.alert("Success order");
                                 this.componentWillMount();
                             }
+                            this.setState({ isLoading: false})
                             // response.error ? response.error : 'Success';
                             if (response.data.error ){
                             dialog.alert(response.data.error)
@@ -52,8 +56,6 @@ export default class PurchaseDetailes extends React.Component {
                         })
                 },()=>{}
         )
-        console.log(this.state.cart._id)
-
     }
     
     render() {
@@ -87,7 +89,7 @@ export default class PurchaseDetailes extends React.Component {
 
                         <tr>
                             <th className="text-right" >
-                                <strong>Date : </strong>
+                                <strong>Purchase date : </strong>
                             </th>
                             <th>
                                 {dateFormatter(cart.date)}
@@ -99,8 +101,8 @@ export default class PurchaseDetailes extends React.Component {
                         <tr>
                             <th className="text-right"><strong>Status : </strong></th>
                             <th style={{ color:'red'}}>{cart.status.toUpperCase()} </th>
-                            { cart.delivery ? <th className="text-right">Arrived time:</th> : <th> </th>}
-                            { cart.delivery ? <th className="text-left"> {dateFormatter(cart.delivery.arrivedTime) }</th> 
+                            { cart.delivery ? <th className="text-center">Arrival time :</th> : <th> </th>}
+                            { cart.delivery ? <th className="text-center"> {dateFormatter(cart.delivery.arrivedTime, true) }</th> 
                                             : cart.status === 'paid' ? <th>
                                                                             <button className="btn btn-info" onClick={this.orderDelivery.bind(this)}>
                                                                                 Order Delivery
@@ -133,7 +135,7 @@ export default class PurchaseDetailes extends React.Component {
                             <th>   </th>
                             <th>   </th>
                             <th className="text-right"><h3><strong>Total sum</strong></h3></th>
-                            <th className="text-center"><h3><strong>$ {cart.purchasesSum/100}</strong></h3></th>
+                            <th className="text-center"><h3><strong>$ {cart.purchasesSum%100===0 ?cart.purchasesSum/100+'.00' : cart.purchasesSum/100 }</strong></h3></th>
                         </tr>
                         
                     </tbody>

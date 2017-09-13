@@ -9,7 +9,7 @@ export default class ConfirmPurchase extends React.Component {
 		super(props);
 
 		this.state = {
-            purchasedCartId : '',
+            purchaseCartId : '',
             badstatus : '',
             sum : '0',
             token : '',
@@ -32,7 +32,7 @@ export default class ConfirmPurchase extends React.Component {
         axios.post('/confirm').then(response => {
             response && this.setState( { 
                             destination : response.data.address || '',
-                            cart : response.data.bankCart || '',
+                            cart : response.data.bankCart+'' || '',
                             sum : response.data.purchasesSum/100,
                             isLoading : false 
                         })
@@ -68,6 +68,7 @@ export default class ConfirmPurchase extends React.Component {
 
     onSubmit(e){
         e.preventDefault();
+        this.setState({ isLoading : true})
         if( !this.props.isAuth ) {
             browserHistory.push('/login');
             return;
@@ -81,9 +82,9 @@ export default class ConfirmPurchase extends React.Component {
         
         axios.put('/confirm',data).then( res =>{
                 if(res.data.error) {
-                    this.setState({ badstatus : res.data.error })
+                    this.setState({ badstatus : res.data.error, isLoading:false })
                 }else if( res ){
-                    this.setState({ purchaseCartId : res.data.cartId
+                    this.setState({ purchaseCartId : res.data.cartId, isLoading : false
                         },()=>dialog.confirm('Your order is paid! Wish you order delivery?'
                         , () => this.setState( { delivery : true}
                                         ,()=>console.log('input after state') )
@@ -100,21 +101,21 @@ export default class ConfirmPurchase extends React.Component {
             return;
         }
         if(!this.validateInput() ) return ;
-        // this.setState({ isLoading : true})
+        this.setState({ isLoading : true})
         console.log('goDEliver')
-        // axios.put(`/confirmdeliver/${this.state.destination}`,{id:this.state.purchasedCartId}).then( res=>{
-        //     console.log(res.data)
-        //     var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
-        //                                         +`.           Arrived time : ${res.data.arrivedtime}`
-        //                                  : res.data.error;
-        //     this.setState({ badstatus : res, isLoading : false })
-        // })
+        axios.put(`/confirmdeliver/${this.state.destination}`,{id:this.state.purchaseCartId}).then( res=>{
+            console.log(res.data)
+            var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
+                                                +`.           Arrived time : ${res.data.arrivedtime}`
+                                         : res.data.error;
+            this.setState({ badstatus : res, isLoading : false })
+        })
     }
 
 
 	render() {
 
-    const { badstatus , sum , destination, errors , token, cart} = this.state;
+    const { badstatus , sum , destination, errors , token, cart, isLoading} = this.state;
     const delivery = (  <div>
                         <div className={classnames("form-group")}>
                         <label className="control-label">Destination : </label>
@@ -136,13 +137,16 @@ export default class ConfirmPurchase extends React.Component {
     <div class="container">  	
         <div className="row">
             <div className="col-md-4 col-md-offset-5">
+                
                 <h3>{ this.state.delivery ? 'Type or change address :' : 'Fill the form :' }</h3>
             </div>
         </div>
 
         <div className="row">
             <div className="col-md-4 col-md-offset-4">
+                    <div className="text-center">{isLoading  ? <h4>Please wait ...</h4>:''}
                     { badstatus && <h4> <p class="text-danger">{badstatus}</p></h4>}
+                    </div>
                 <div>
                 { this.state.delivery ? delivery :<form >
                         
