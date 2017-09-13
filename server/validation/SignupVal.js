@@ -1,5 +1,5 @@
-var Validator = require('validator');
-var isEmpty = require ('lodash/isEmpty');
+const Validator = require('validator');
+const _ = require ('underscore');
 
 
 module.exports = function validateInput(data){
@@ -24,6 +24,6 @@ module.exports = function validateInput(data){
   }
 
   return { errors : errors,
-   isValid:isEmpty(errors)
+   isValid: _.isEmpty(errors)
  }
 }

@@ -14,8 +14,8 @@ exports.editPassword = (req, res) => {
             }, { new: true })
     ).then(user => req.login(user, err => {
         if (err) throw new Error("Can't logged user")
-        if (!err) res.send(user)
-    })).catch(err => res.send(err.message))
+        if (!err) res.json(user)
+    })).catch(err => res.json(err.message))
 }
 
 exports.saveProfile = (req, res) => {
@@ -31,7 +31,7 @@ exports.saveProfile = (req, res) => {
         (err, newuser) => {
             if (err) return res.send(err);
             req.login(newuser, err => {
-                if (!err) res.send(newuser._id);
+                if (!err) res.json(newuser._id);
             });
         }
     );
@@ -39,7 +39,7 @@ exports.saveProfile = (req, res) => {
 
 exports.findCurrentUser = (req, res) => {
     User.findById(req.user._id, (err, user) => {
-        return res.send(user);
+        return res.json(user);
     })
 }
 
@@ -62,7 +62,7 @@ exports.register = (req, res) => {
     }).then(cart => {
         if (cart) {
             req.login(newuser, err => {
-                if (!err) res.send(newuser)
+                if (!err) res.json({_id : newuser._id})
             })
         }
     }).catch(err => res.json({ error: err.message }));

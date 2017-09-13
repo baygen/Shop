@@ -99,7 +99,7 @@ exports.setDiscountToCart = ( req, res)=>{
     }).then(  doc =>{
             res.json({ success : true});
     }).catch(err => {
-            res.json(err.message)
+            res.json({success : false, error: err.message})
     });
     
 }
@@ -131,7 +131,7 @@ exports.checkout = (req, res) => {
             purchasesSum += cost;
             item.cost = cost;
 
-            if( discount != null ){
+            if( discount != null && discount.dateExpired > Date.now()){
                 let discData = _.find( discount.product, prod => prod.prodTitle == product.title);
                 if( typeof discData !== 'undefined'){
                     let priceWithDisc = Math.round(product.price * (100 - discData.discount)/100);
@@ -216,7 +216,7 @@ exports.findUserHistory = (req, res) => {
     let order = inputOrder ==='asc' ? 1 : -1 ;
 
     let sortedField = req.body.field || "purchasedDate" ;
-    let limit = req.body.pageSize || 10 ;
+    let limit = req.body.pageSize || 5 ;
     var skip = req.body.page ? (req.body.page - 1)*limit : 0 ;
 
     let filter = { userId: req.user._id , status: { $in: ['delivering','complete','paid'] } };
@@ -265,7 +265,7 @@ exports.findPurchaseById = ( id , res)=>{
     .catch( err => console.log(err))
 }
 
-exports.getConfirmData = (req, res) => {
+exports.getPreConfirmData = (req, res) => {
 
     let filter = { userId: req.user._id, status : 'shoppingCart' };
 

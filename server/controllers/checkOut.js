@@ -10,7 +10,7 @@ var confirm = (req, res, next) => {
 module.exports = (app) => {
 
     app.use('/checkout', isLogged)
-    app.use('/confirm', isLogged)
+    app.use('/confirm', isLogged, confirm)
 
     app.post('/checkout', (req, res) => {
         dbPurchase.checkout(req, res)
@@ -18,7 +18,7 @@ module.exports = (app) => {
 
 
     app.post('/confirm', (req, res) => {
-        dbPurchase.getConfirmData(req, res)
+        dbPurchase.getPreConfirmData(req, res)
     })
 
     app.put('/confirm', (req, res) => {
@@ -33,7 +33,8 @@ module.exports = (app) => {
 
     app.put('/confirmdeliver/:address', (req, res)=>{
 
-        let url = config.deliveryToAddURL+`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
+        let url = config.deliveryToAddURL
+                +`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
         
         axios.get(url)
         .then( response =>{
@@ -42,7 +43,6 @@ module.exports = (app) => {
                 let deliveryData = { track : resData.track,
                                     beDelivered : resData.beDeliveredDateFormat||resData.beDelivered
                                 }
-                console.log( "track" , resData.track );
                 dbPurchase.setDeliveryData( deliveryData, req, res)
         }).catch( err => {
             console.log(err);

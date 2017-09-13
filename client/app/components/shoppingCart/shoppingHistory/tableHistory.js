@@ -33,7 +33,7 @@ export default class TableHistory extends React.Component {
           loading : false,
           totalSize : 0,
           currentPage : 1,
-          sizePerPage : 10,
+          sizePerPage : 5,
           id : '',
           field : 'purchasedDate',
           sortOrder : 'desc',

@@ -14,7 +14,7 @@ export default class NavigationBar extends React.Component{
 
       const logged = (
         <ul className="nav navbar-nav navbar-right">
-        <li><Link to="/profile"><strong>Hi, {this.props.username}!</strong></Link></li>  
+        <li><Link to="/profile"><span className="glyphicon glyphicon-user"></span><strong> Hi, {this.props.username}!</strong></Link></li>  
         <li><Link to="/shoppingcart"><strong><span className="glyphicon glyphicon-shopping-cart"></span> Shopping cart</strong></Link></li>
         <li><Link to="/shoppinghistory"><strong><span className="glyphicon glyphicon-list"></span> History</strong></Link></li>
         <li onClick={this.props.logout()}><Link to='/login'><strong>Logout</strong></Link></li>

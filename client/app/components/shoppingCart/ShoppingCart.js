@@ -2,7 +2,6 @@ import React from 'react';
 import axios from 'axios';
 import Item from './item';
 import {browserHistory} from 'react-router';
-import isEmpty from 'lodash/isEmpty';
 
 
 export default class ShoppingCart extends React.Component {
@@ -37,7 +36,7 @@ export default class ShoppingCart extends React.Component {
 
     	axios.post('/shoppingcart').then(response => {
 			const data = response.data.result;
-				if(isEmpty(data)){
+				if( data.length === 0){
 					this.setState({ message : 'cart is empty' , isLoading : false});
 				}else{
 					this.setState({ items : data, isLoading : false , cartId : response.data.cartId})
@@ -52,7 +51,7 @@ export default class ShoppingCart extends React.Component {
 		this.setState({ isUpdating : true })		
 		var items = this.state.items;
 		items.splice(index,1);
-		if( items.length == 0 ) this.setState({message : 'cart empty',isUpdating : false})
+		if( items.length == 0 ) this.setState({ message : 'cart empty',isUpdating : false})
 		this.updateData()		
 	}
 	
@@ -93,8 +92,8 @@ export default class ShoppingCart extends React.Component {
 		if(this.state.discountCode){
 			axios.post(`/shoppingcart/${this.state.discountCode}`)
 				.then( response => {
-					if(response.data) {
-						let result = 'Sorry , but '+response.data;
+					if(response.data.success === false) {
+						let result = 'Sorry , but '+response.data.error;
 						alert(result)
 					}
 					browserHistory.push('/checkout')
