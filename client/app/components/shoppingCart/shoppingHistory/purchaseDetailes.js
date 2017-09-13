@@ -20,6 +20,7 @@ export default class PurchaseDetailes extends React.Component {
         super(props);
         this.state = {
                 cart: {},
+                userAddress:'',
                 isLoading : false
             }
         this.orderDelivery = this.orderDelivery.bind(this);
@@ -31,30 +32,29 @@ export default class PurchaseDetailes extends React.Component {
 
         axios.post(`/shoppinghistory/${id}`)
         .then(response =>{
-            if(response.data) this.setState({ cart : response.data });
+            if(response.data) this.setState({ cart : response.data.cart, userAddress: response.data.address });
             this.setState({ isLoading : false})
         })     
     }
     
     orderDelivery(){
         let id = this.state.cart._id;
-        dialog.prompt('Type destination'
+        var d = dialog.prompt('Change or type destination'
                 , (input)=>{
                     this.setState({ isLoading: true})
                     axios.put(`/confirmdeliver/${input}`, {id : id}
-                        ).then( response =>{
-                            console.log(response.data)
-                            if (response.data.track ){
-                             dialog.alert("Success order");
-                                this.componentWillMount();
-                            }
-                            this.setState({ isLoading: false})
-                            // response.error ? response.error : 'Success';
-                            if (response.data.error ){
+                    ).then( response =>{
+                        if (response.data.track ){
+                            dialog.alert("Success order");
+                            this.componentWillMount();
+                        }
+                        this.setState({ isLoading: false})
+                        
+                        if (response.data.error )
                             dialog.alert(response.data.error)
-                            this.orderDelivery()}
-                        })
-                },()=>{}
+                    })
+                },()=>{ }
+                , this.state.userAddress
         )
     }
     
@@ -95,20 +95,18 @@ export default class PurchaseDetailes extends React.Component {
                                 {dateFormatter(cart.date)}
                             </th>
                             <th> </th>
-                            <th> </th>
+                            <th> {cart.status === 'paid' ?  <button className="btn btn-info" onClick={this.orderDelivery.bind(this)}>
+                                                            Order Delivery
+                                                            </button> 
+                                                          : ''}</th>
                         </tr>
 
                         <tr>
                             <th className="text-right"><strong>Status : </strong></th>
                             <th style={{ color:'red'}}>{cart.status.toUpperCase()} </th>
-                            { cart.delivery ? <th className="text-center">Arrival time :</th> : <th> </th>}
-                            { cart.delivery ? <th className="text-center"> {dateFormatter(cart.delivery.arrivedTime, true) }</th> 
-                                            : cart.status === 'paid' ? <th>
-                                                                            <button className="btn btn-info" onClick={this.orderDelivery.bind(this)}>
-                                                                                Order Delivery
-                                                                            </button> 
-                                                                       </th>
-                                                                      : <th> </th>}
+                            { cart.status ==='delivering' ? <th className="text-center">Arrival time :</th> : <th> </th>}
+                            { cart.status ==='delivering' ? <th className="text-center"> {dateFormatter(cart.delivery.arrivedTime, true) }</th> 
+                                                          : <th> </th>}
                         </tr>
                         <tr>
                             <th></th><th></th><th></th><th></th>

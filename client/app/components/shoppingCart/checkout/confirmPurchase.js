@@ -31,8 +31,8 @@ export default class ConfirmPurchase extends React.Component {
         this.setState({ isLoading:true })
         axios.post('/confirm').then(response => {
             response && this.setState( { 
-                            destination : response.data.address || '',
-                            cart : response.data.bankCart+'' || '',
+                            destination : response.data.address ,
+                            cart : response.data.bankCart || '' ,
                             sum : response.data.purchasesSum/100,
                             isLoading : false 
                         })
@@ -76,23 +76,32 @@ export default class ConfirmPurchase extends React.Component {
         if( !this.validateInput() ) return ;
         const data = {
             amount : this.state.sum,
-            sourceAccount : this.state.cart,
+            sourceAccount : this.state.cart+'',
             token : this.state.token
         }
-        
-        axios.put('/confirm',data).then( res =>{
+        axios.post('/checkout',{confirm:true })
+        .then( response => {
+            if(response.data.purchasesSum/100 !== data.amount) {
+                this.setState({ sum: response.data.purchasesSum})
+                throw new Error(`Sorry but sum was changed, new sum is : ${response.data.purchasesSum}`)
+            }
+            return axios.put('/confirm',data)
+        }).then( res =>{
                 if(res.data.error) {
                     this.setState({ badstatus : res.data.error, isLoading:false })
                 }else if( res ){
                     this.setState({ purchaseCartId : res.data.cartId, isLoading : false
                         },()=>dialog.confirm('Your order is paid! Wish you order delivery?'
-                        , () => this.setState( { delivery : true}
-                                        ,()=>console.log('input after state') )
-                        ,()=> browserHistory.push('/') )
+                            ,() => this.setState( { delivery : true})
+                            ,() => browserHistory.push('/') )
                     );
                 }
+                this.setState({isLoading:false})
             }
-        )
+        ).catch( err=>{
+            this.setState({ badstatus : err.message, isLoading:false})
+        })
+
     }
 
     goDeliver(){
@@ -102,13 +111,14 @@ export default class ConfirmPurchase extends React.Component {
         }
         if(!this.validateInput() ) return ;
         this.setState({ isLoading : true})
-        console.log('goDEliver')
-        axios.put(`/confirmdeliver/${this.state.destination}`,{id:this.state.purchaseCartId}).then( res=>{
-            console.log(res.data)
-            var res = res.data.arrivedTime ? 'Your trackcode : '+res.data.trackcode 
-                                                +`.           Arrived time : ${res.data.arrivedtime}`
-                                         : res.data.error;
-            this.setState({ badstatus : res, isLoading : false })
+
+        axios.put(`/confirmdeliver/${this.state.destination}`,{id:this.state.purchaseCartId}
+        ).then( response=>{
+            let message = response.data.error || response.data.error;
+            response.data.track && dialog.alert( 'Your order confirmed. You could see arrival time in order history.'
+                                        ,()=>browserHistory.push('/') )
+                                    
+            this.setState({ badstatus : message, isLoading : false })
         })
     }
 

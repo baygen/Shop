@@ -6,8 +6,8 @@ module.exports = (app) => {
 
     app.use('/shoppingcart', isLogged );
 
-    app.post('/shoppingcart', (req,res, next)=>
-        dbPurchase.getShoppingCart(req,res, next)
+    app.post('/shoppingcart', (req,res )=>
+        dbPurchase.getShoppingCart(req,res)
     );
 
     app.post('/shoppingcart/:discontcode', (req,res)=>

@@ -35,7 +35,7 @@ class CheckOut extends React.Component {
 
 
   confirmPurchase(){
-      if(this.items.length !== 0)
+      if(this.state.items.length !== 0)
     browserHistory.push('/confirm')
   }
 

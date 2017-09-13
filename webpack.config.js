@@ -8,7 +8,6 @@ var APP_DIR = path.join(__dirname, 'client/app');
 
 var config = {
 	devtools: "cheap-module-source-map",
-	// "eval-source-map",
 	
 	entry : [ 
 		path.join(__dirname, 'client/app/index.js')

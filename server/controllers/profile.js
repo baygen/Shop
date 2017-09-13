@@ -14,9 +14,8 @@ module.exports = (app) => {
         dbUser.saveProfile(req,res)
     );
 
-    app.post('/editpassword', 
-        (req,res)=>{
-            if(req.user) dbUser.editPassword(req,res)
-    })
+    app.post('/editpassword', isLogged,(req, res)=>
+        dbUser.editPassword(req,res)
+    )
 
 }

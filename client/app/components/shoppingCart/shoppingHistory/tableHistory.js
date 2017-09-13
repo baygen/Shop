@@ -169,7 +169,8 @@ export default class TableHistory extends React.Component {
       
         <div>{ loading ? <div className="col-sm-12 col-md-10 col-md-offset-5"> Loading data...</div> :
         <div>
-               <div className="col-sm-12 col-md-10 col-md-offset-5"> { process ? <label>Loading data...</label>:<label >&nbsp;</label>}</div>
+               <div className="col-sm-12 col-md-10 col-md-offset-5"> <h3>Shopping history </h3>
+                 <p>{ process ? <label>Loading data...</label>:<label >&nbsp;</label>}</p></div>
               <BootstrapTable data = { purchases } 
                               striped = { true }
                               pagination = { true }

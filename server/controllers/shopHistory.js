@@ -11,7 +11,7 @@ module.exports = (app) => {
     })
     
     app.post('/shoppinghistory/:id', (req,res)=>{
-        dbPurchase.findPurchaseById( req.params.id , res );
+        dbPurchase.findPurchaseById( req , res );
     })
     
     

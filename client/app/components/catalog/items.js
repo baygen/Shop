@@ -16,7 +16,7 @@ export default class ItemsPage extends React.Component {
                   <img src={this.props.item.img[0]} height="120" width="160"/>
                 </li>
 
-                <li class="list-group-item" style={{ height:'27%', paddingTop: '6px' }} >
+                <li class="list-group-item" style={{ height:'130px', paddingTop: '6px' }} >
                   <Link to={`/item/${this.props.item._id}`} >
                     <h3 className="panel-title">{this.props.item.title}</h3>
                   </Link>
