@@ -12,7 +12,7 @@ export default class ItemView extends React.Component {
     }
 
     onChange(e){
-        if(e.target.value>0){
+        if(e.target.value>0 ){
             this.props.countAmount(this.props.id, e.target.value);
         }  
     }
