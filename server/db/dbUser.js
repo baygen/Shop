@@ -19,7 +19,12 @@ exports.editPassword = (req, res) => {
 }
 
 exports.saveProfile = (req, res) => {
-    User.findByIdAndUpdate(req.user._id, {
+
+    User.findOne({ email : req.body.email}
+    ).then( founded=>{
+        if(founded)throw new Error('Cant save this email')
+
+        return User.findByIdAndUpdate(req.user._id, {
             $set: {
                 name: req.body.name,
                 email: req.body.email,
@@ -27,14 +32,15 @@ exports.saveProfile = (req, res) => {
                 address: req.body.address,
                 bankCart: +req.body.bankCart
             }
-        }, { new: true },
-        (err, newuser) => {
-            if (err) return res.send(err);
+        }, { new: true })
+    }).then( newuser => {
             req.login(newuser, err => {
-                if (!err) res.json(newuser._id);
+                if (!err) res.json({ id:newuser._id});
             });
-        }
-    );
+    }).catch( err=>{
+        console.log(err);
+        res.send({ error: err.message})
+    })
 }
 
 exports.findCurrentUser = (req, res) => {

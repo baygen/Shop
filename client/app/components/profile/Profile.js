@@ -1,6 +1,5 @@
 import React from 'react';
 import axios from 'axios';
-import classnames from 'classnames';
 import {browserHistory} from 'react-router';
 
 
@@ -29,14 +28,15 @@ export default class Profile extends React.Component {
         e.preventDefault();
         this.setState({ loading : true})        
         axios.put('/profile',this.state).then( response=>{
-            if(response.data){
+            if(response.data.id){
                 this.setState({ saved:'Changes are saved!', loading : false});
                 this.props.login(this.state.name);
             }else{
-                this.setState({saved:"This email already exist, try another", loading : false});
+                this.setState({
+                              saved: `email "${this.state.email}" already exist, try another`, 
+                              loading : false
+                              });
             }
-        }).catch(err=>{
-            this.setState({saved:err});
         })
     }
 
@@ -46,14 +46,15 @@ export default class Profile extends React.Component {
         axios.post('/profile').then(response => {
                 const user = response.data;
                 if(user._id){
-                this.setState({
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone,
-                    address : user.address || '',
-                    bankCart : user.bankCart || '',
-                    loading : false
-                });}
+                  this.setState({
+                      name: user.name,
+                      email: user.email,
+                      phone: user.phone,
+                      address : user.address || '',
+                      bankCart : user.bankCart || '',
+                      loading : false
+                  });
+                }
         });
         
 	}
@@ -73,7 +74,7 @@ export default class Profile extends React.Component {
         </div>
       <div className="col-md-8 col-md-offset-2 personal-info">
 
-      {saved && <div className="alert alert-success alert-dismissible" role="alert"><h4 className="col-md-offset-5">{saved}</h4></div>}
+      {saved && <div className="alert alert-info alert-dismissible" role="alert"><h4 className="col-md-offset-5">{saved}</h4></div>}
       { this.state.loading ? <div className="col-sm-12 col-md-10 col-md-offset-4"><h3>Loading data... Please wait</h3></div>:
 
       <div class="jumbotron">
