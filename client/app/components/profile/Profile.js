@@ -74,7 +74,7 @@ export default class Profile extends React.Component {
         </div>
       <div className="col-md-8 col-md-offset-2 personal-info">
 
-      {saved && <div className="alert alert-info alert-dismissible" role="alert"><h4 className="col-md-offset-5">{saved}</h4></div>}
+      {saved && <div className="alert alert-info alert-dismissible" role="alert"><h4 className="col-md-offset-3">{saved}</h4></div>}
       { this.state.loading ? <div className="col-sm-12 col-md-10 col-md-offset-4"><h3>Loading data... Please wait</h3></div>:
 
       <div class="jumbotron">

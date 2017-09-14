@@ -97,7 +97,7 @@ onSubmit(e){
         
         <div className="form-group">
           <button disabled={this.state.isLoading} className="btn btn-primary btn-lg">
-            Registrate
+            Sign up
           </button>
         </div>
       </form>

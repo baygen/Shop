@@ -22,7 +22,7 @@ exports.saveProfile = (req, res) => {
 
     User.findOne({ email : req.body.email}
     ).then( founded=>{
-        if(founded)throw new Error('Cant save this email')
+        if(founded.email !== req.user.email)throw new Error('Cant save this email')
 
         return User.findByIdAndUpdate(req.user._id, {
             $set: {

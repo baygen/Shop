@@ -70,7 +70,7 @@ export default class Item extends React.Component {
                 <br/>
                 {item.desc}
                 <br/>
-                <h3 className=" text-right" ><strong>{item.accessible ? "Price :"+ (item.price/100)+ '$': "not availiabe"}</strong></h3>
+                <h3 className=" text-right" ><strong>{item.accessible ? "Price : "+ (item.price%100===0?item.price/100+'.00':item.price/100)+ '$': "not availiabe"}</strong></h3>
               </div>
               <div className= "col-md-4 text-center"> 
                 <strong><h3>Properties:</h3></strong>
