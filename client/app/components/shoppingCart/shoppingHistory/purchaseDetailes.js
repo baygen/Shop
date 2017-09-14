@@ -55,7 +55,7 @@ export default class PurchaseDetailes extends React.Component {
                     })
                 },()=>{ }
                 , this.state.userAddress
-        )
+        ).set('reset',false);
     }
     
     render() {
