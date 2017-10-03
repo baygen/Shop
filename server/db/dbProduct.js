@@ -7,6 +7,8 @@ function getPaginatedItems(items, offset) {
     return items.slice(offset, offset + 12);
 }
 
+
+
 exports.findAll = (req, res) => {
     Product.find({},
         (err, data) => { if (data) res.json(data) }
@@ -21,7 +23,7 @@ exports.findItem = (id, res) => {
 }
 
 exports.getMinMaxPrices = (res)=>{
-
+  "use strict";
     let filter = { accessible: true};
     Promise.all([
         Product.findOne( filter,'price').sort('-price').limit(1),
@@ -41,7 +43,7 @@ exports.listItem = (req, res) => {
     var maxPrice = req.query.maxPrice ? req.query.maxPrice * 100 : 1000000;
     var props = req.query.props ? JSON.parse(req.query.props) : [];
 
-    
+
     if (props.length > 0) {
         var a = _.map(props, p => {
             return {
@@ -60,10 +62,10 @@ exports.listItem = (req, res) => {
 
     /*Find in BD*/
     Product.find({
-        $and: [{ $or: 
+        $and: [{ $or:
                 [{ title: { $regex: regex } }, { desc: { $regex: regex } }]},
                 { price: { $gte: minPrice, $lte: maxPrice },}, { $or: a }
-                // , { accessible : true} 
+                // , { accessible : true}
             ]
     }).then( doc=> {
         var data = { doc : getPaginatedItems(doc, offset), total_count: Math.ceil( doc.length / 12) };
@@ -80,10 +82,11 @@ exports.listProps = (req, res) => {
 }
     /* Get value */
 exports.listValue = (req, res) => {
+  "use strict";
     let arr = [];
 
     Product.distinct("properties").then(prop => {
-        reqProp = req.query.prop;
+        let reqProp = req.query.prop;
         var numberSort = !!(reqProp == "Total Installed Memory");
 
         for (let i = 0, len = prop.length; i < len; i++) {

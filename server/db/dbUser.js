@@ -1,6 +1,7 @@
 const User = require('../dbSchemas/user');
 const Purchase = require('../dbSchemas/purchase');
 const bcrypt = require('bcrypt')
+'use strict'
 
 exports.editPassword = (req, res) => {
     bcrypt.compare(req.body.oldPassword, req.user.password
@@ -63,7 +64,7 @@ exports.register = (req, res) => {
         return User.create(newuser)
     }).then(user => {
         newuser = user;
-        let cart = { userId: user._id, status: 'shoppingCart', date: Date.now() }
+        var cart = { userId: user._id, status: 'shoppingCart', date: Date.now() }
         return Purchase.create(cart);
     }).then(cart => {
         if (cart) {

@@ -17,7 +17,7 @@ class App extends React.Component {
 
   login(username){
     this.setState({
-      isAuth: true, 
+      isAuth: true,
       username: username
     });
   }
@@ -35,12 +35,12 @@ class App extends React.Component {
   checkAuth(){
 
     axios.post('/').then(response=>{
-        if(response.data.auth == 'true'){
+        if(response.data.auth === 'true'){
           this.setState({
-            isAuth : true, 
+            isAuth : true,
             username : response.data.username
           });
-        }else if(response.data.auth == 'false'){
+        }else if(response.data.auth === 'false'){
           this.setState({ isAuth : false });
         }
     });
@@ -67,8 +67,8 @@ class App extends React.Component {
 
     return (
       <div className="container">
-        <NavigationBar 
-          isAuth = {this.state.isAuth} 
+        <NavigationBar
+          isAuth = {this.state.isAuth}
           logout = {()=>this.logout}
           username = {this.state.username}
           />

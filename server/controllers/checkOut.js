@@ -7,7 +7,7 @@ module.exports = (app) => {
 
     app.use('/checkout', isLogged)
     app.use('/confirm', isLogged)
-    
+
 
     app.post('/checkout', (req, res) => {
         dbPurchase.checkout(req, res)
@@ -32,10 +32,10 @@ module.exports = (app) => {
     })
 
     app.put('/confirmdeliver/:address', (req, res)=>{
-
+"use strict"
         let url = config.deliveryToAddURL
                 +`?from=${config.shopAddress}&to=${req.params.address}&email=${req.user.email}`;
-        
+
         axios.get(url)
         .then( response =>{
             if( response.data.success === true) {
